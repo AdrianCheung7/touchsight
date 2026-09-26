@@ -123,8 +123,8 @@ function Sparkline({ values }: { values: number[] }) {
         <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" className="stroke-ink" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
         <circle cx={lx} cy={ly} r="3.5" className="fill-accent" />
       </svg>
-      <span aria-hidden="true" className="w-16 font-mono tabular-nums">
-        {values[values.length - 1]} s
+      <span aria-hidden="true" className="w-16">
+        <span className="font-mono tabular-nums">{values[values.length - 1]}</span> s
       </span>
     </div>
   )

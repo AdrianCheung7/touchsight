@@ -14,30 +14,17 @@ const PAD = 1 // mm of blank paper around each braille label, so outlines don't 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f = (n: number) => n.toFixed(2)
 
-// Braille lines that fit `width` mm, breaking between words.
-function wrap(text: string, width: number): Cell[][] {
-  const lines: Cell[][] = []
-  let cur = ''
-  for (const w of text.split(/\s+/).filter(Boolean)) {
-    const next = cur ? `${cur} ${w}` : w
-    if (cur && brailleWidth(cellsFor(next)) > width) {
-      lines.push(cellsFor(cur))
-      cur = w
-    } else cur = next
-  }
-  if (cur) lines.push(cellsFor(cur))
-  return lines
-}
-
-// Print lines of roughly `chars` characters.
-function printLines(text: string, chars: number): string[] {
+// Words joined into lines while `fits` holds, breaking between words.
+function wrap(text: string, fits: (line: string) => boolean): string[] {
   const lines: string[] = []
-  for (const w of text.split(' ')) {
-    if (lines.length && (lines[lines.length - 1] + ' ' + w).length <= chars) lines[lines.length - 1] += ' ' + w
+  for (const w of text.split(/\s+/).filter(Boolean)) {
+    const joined = `${lines[lines.length - 1]} ${w}`
+    if (lines.length && fits(joined)) lines[lines.length - 1] = joined
     else lines.push(w)
   }
   return lines
 }
+const brailleFits = (width: number) => (line: string) => brailleWidth(cellsFor(line)) <= width
 
 const label = (x: number, y: number, cells: Cell[]) =>
   `<rect x="${f(x - PAD)}" y="${f(y - PAD)}" width="${f(brailleWidth(cells) + 2 * PAD)}" height="${f(CELL_HEIGHT + 2 * PAD)}" fill="#fff"/>` + drawCells(x, y, cells)
@@ -46,7 +33,7 @@ export function exportSvg(fig: Figure): { svg: string; keys: { n: number; label:
   const out: string[] = []
 
   // Page 1: braille title, diagram, print caption.
-  const title = wrap(fig.title, CONTENT_W)
+  const title = wrap(fig.title, brailleFits(CONTENT_W)).map(cellsFor)
   title.forEach((cells, i) => out.push(drawCells(M, M + i * LINE_PITCH, cells)))
   const top = M + title.length * LINE_PITCH + 4
   const bottom = PAGE_H - M - 12
@@ -118,12 +105,12 @@ export function exportSvg(fig: Figure): { svg: string; keys: { n: number; label:
       const num = cellsFor(String(k.n))
       const indent = brailleWidth(num) + CELL_PITCH
       out.push(drawCells(M, y, num))
-      for (const cells of wrap(k.label, CONTENT_W - indent)) {
-        out.push(drawCells(M + indent, y, cells))
+      for (const line of wrap(k.label, brailleFits(CONTENT_W - indent))) {
+        out.push(drawCells(M + indent, y, cellsFor(line)))
         y += LINE_PITCH
       }
     }
-    const print = printLines(`Key: ${keys.map((k) => `${k.n} ${k.label}`).join(' · ')}`, 95)
+    const print = wrap(`Key: ${keys.map((k) => `${k.n} ${k.label}`).join(' · ')}`, (line) => line.length <= 95)
     print.forEach((t, i) => out.push(`<text x="${M}" y="${f(2 * PAGE_H - M - (print.length - 1 - i) * 5)}" font-size="3.6" font-family="Helvetica, Arial, sans-serif">${esc(t)}</text>`))
   }
 
