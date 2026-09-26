@@ -154,13 +154,13 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
 - [x] Show a QR code for the explorer link (`qrcode`, data URL) in the export dialog.
 - **Verify:** "Cell" encodes as ⠠⠉⠑⠇⠇ and "12" as ⠼⠁⠃. The SVG opens in the browser with correctly sized dots, and small regions use key numbers.
 
-## B7 · About + demo panel (~30 min)
+## B7 · About + demo panel (~30 min) ✅
 
-- [ ] `About.tsx` (`#/about`), a single screen:
+- [x] `About.tsx` (`#/about`), a single screen:
   - the pipeline as five boxes: diagram → teacher traces → figure data → sound & speech → braille;
   - three claims: $0 · offline · private;
   - credits, licenses, and the Sources list from `DEMO.md`.
-- [ ] `DemoPanel.tsx`, opened with `Ctrl+Shift+D` from anywhere. B's handler ignores the key while pointer lock is active. It's a small unlabelled-looking "Presenter" sheet with:
+- [x] `DemoPanel.tsx`, opened with `Ctrl+Shift+D` from anywhere. B's handler ignores the key while pointer lock is active. It's a small unlabelled-looking "Presenter" sheet with:
   - **Reset everything** (`resetDemo()` then reload);
   - **Open hero** (`href.explore('animal-cell', 'guest', 'mitochondrion')`);
   - **Open dashboard**;

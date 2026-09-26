@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { parseRoute } from './contract/routes.ts'
 import Explore from './student/Explore.tsx'
 import About from './teacher/About.tsx'
+import DemoPanel from './teacher/DemoPanel.tsx'
 import Edit from './teacher/Edit.tsx'
 import Header from './teacher/Header.tsx'
 import Home from './teacher/Home.tsx'
@@ -27,17 +28,21 @@ export default function App() {
 
   if (route.page === 'explore') {
     return (
-      <Explore
-        key={`${route.figureId}/${route.studentId}/${route.target ?? ''}`}
-        figureId={route.figureId}
-        studentId={route.studentId}
-        target={route.target}
-      />
+      <>
+        <Explore
+          key={`${route.figureId}/${route.studentId}/${route.target ?? ''}`}
+          figureId={route.figureId}
+          studentId={route.studentId}
+          target={route.target}
+        />
+        <DemoPanel />
+      </>
     )
   }
 
   return (
     <>
+      <DemoPanel />
       <Header page={route.page} />
       {route.page === 'edit' ? (
         <Edit key={route.figureId} figureId={route.figureId} />
