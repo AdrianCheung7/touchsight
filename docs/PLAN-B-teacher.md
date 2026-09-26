@@ -92,16 +92,16 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - `getStudent('guest')` returns the default prefs.
 - **Verify:** tests pass. `#/explore/animal-cell?student=guest` loads the real cell in A's placeholder or shell.
 
-## B2 · Answers + AI module (~30 min)
+## B2 · Answers + AI module (~30 min) ✅
 
-- [ ] `answers.ts`: for every cell and Canada label (lowercased), an `explain` sentence plus 3–5 Q&A pairs keyed by intent: `what`, `why`, `where`, `size`, `fact` (Canada adds `capital`).
+- [x] `answers.ts`: for every cell and Canada label (lowercased), an `explain` sentence plus 3–5 Q&A pairs keyed by intent: `what`, `why`, `where`, `size`, `fact` (Canada adds `capital`).
   - Write them the way a patient Grade 5 teacher would speak: concrete, 1–2 sentences.
-- [ ] `ai.ts`:
+- [x] `ai.ts`:
   - `explainRegion` returns `answers[label].explain`.
   - `askQuestion` classifies the question by keywords ("what/do/does" → what, "why", "where", "big/small/size" → size, "capital", otherwise fact) and returns the matching answer.
   - For unknown labels (uploads), build a sentence from the region's own explanation. If that is empty too, answer "That part is called <label>."
   - Resolve after a random 0.9–1.8 s delay. **Never reject** (CONTRACT §5).
-  - Keep the **single switch** `const AI_BACKEND = 'local' as 'local' | 'ollama'`; B9 adds the Ollama branch behind it.
+  - ~~Keep the **single switch** `const AI_BACKEND = 'local' as 'local' | 'ollama'`~~ — omitted: B9 (live Ollama) is skipped by decision, so the answer table is the only backend.
 - **Verify:** unit test: "what does it do?" on the mitochondrion gives the `what` answer; "capital?" on BC gives Victoria; an unknown label never throws. **Merge to `main`: this is C1.** Tell Part A.
 
 ## B3 · Dashboard, header, student page (~60 min) ✅
