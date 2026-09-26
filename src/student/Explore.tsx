@@ -57,7 +57,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         </>
       )}
 
-      <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-6 py-5 text-sm">
+      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
         <a className="underline-offset-4 hover:underline" href={href.home()}>
           Back to home
         </a>
