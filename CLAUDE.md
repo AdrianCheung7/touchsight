@@ -1,46 +1,45 @@
-# TouchSight — hackathon build
+# TouchSight
 
-A blind student explores any textbook diagram by touch and sound. A teacher prepares the diagram once on a laptop (AI runs here); the student explores it on a phone (no AI runs here). Full brief: `docs/brief.md`. Research behind the idea: `docs/research-*.md`.
+Blind students explore textbook diagrams **by sound on a laptop trackpad**: stereo pan = x, pitch = y, a timbre change inside a part, and spoken names. Teachers get a workspace: a library, classes, progress, an editor, and swell-paper braille export.
 
-## Non-negotiables
-- **$0 runtime.** The shipped app never calls Claude, OpenAI, or any keyed/paid API. All inference runs in the browser (Transformers.js) or not at all.
-- **Offline demo.** Every model is served from `public/models/` with remote loading disabled. The demo must work in airplane mode.
-- **Screen readers are first-class.** VoiceOver/TalkBack capture touch gestures, so the explorer has two modes (see "Accessibility"). Every control outside the explorer must be fully labelled and operable without sight.
-- **AI runs once per diagram, before exploration.** The student-side explorer is deterministic hit-testing plus audio.
+Built for **HelloHacks 2026** (UBC). **Code freeze 08:00, Sun 27 Sep 2026**; the Devpost deadline is 11:00 PDT. Judging: Functionality 35%, Pitch 25%, Technical Complexity 20%, UX & Design 20%.
 
-## Stack
-- Vite 8 + React 19 + TypeScript + Tailwind 4. Vitest for logic tests.
-- `@huggingface/transformers` 4.x in a Web Worker: Florence-2-base-ft (`<OCR_WITH_REGION>`, `<OD>`, `<DENSE_REGION_CAPTION>`) and SlimSAM for click-to-correct. WebGPU → `q4f16`/`fp16`; no WebGPU → WASM with `q8` (`_quantized` files).
-- `tesseract.js` as OCR fallback (English data in `public/models/tesseract/`).
-- Web Audio (`StereoPannerNode` edge ticks), `speechSynthesis` (prefer `localService` voices), `navigator.vibrate` on Android only.
-- `idb-keyval` for stored diagrams; `lz-string` + `qrcode` to hand a diagram from teacher to student.
-- `vite-plugin-pwa` is installed but not configured yet.
+## Two parts, built in parallel. Know which one you are
+
+| Part | Plan | Owns |
+|---|---|---|
+| **A: Student Explorer & Sound** | `docs/PLAN-A-student.md` | `src/student/**` |
+| **B: Teacher, Data & App Shell** | `docs/PLAN-B-teacher.md` | everything else in `src/`, plus `public/`, and the package and config files |
+
+- **Before doing anything, confirm which part this session is.** If the user hasn't said, ask.
+- `docs/CONTRACT.md` is the single source of truth for ownership, shared types, routes, APIs and checkpoints. **Never edit a file your part doesn't own.** Never edit `src/contract/**` or the frozen docs.
+- Work your plan top to bottom. Tick a box only after its **Verify** passes, and commit after every step with an `A:` or `B:` prefix on your own branch (`a/student` / `b/teacher`). Merge to `main` only at checkpoints.
+
+Also read: `docs/SPEC.md` (what), `docs/DESIGN.md` (look, sound, words), `docs/DEMO.md` (the pitch; never break the demo path).
+
+## Operating rules
+
+- **Ponytail is ON.** Lazy senior dev: YAGNI, platform APIs first, no new dependency unless unavoidable, fewest files, no unrequested abstractions. Mark deliberate corner-cuts with `// ponytail: <ceiling> — <upgrade path>`. Not lazy about: accessibility, audio calibration on the real hardware, validation at trust boundaries (uploads, IndexedDB).
+- **Optimize for the demo.** The app runs on a hardcoded database (`src/data/seed.ts` + `src/data/figures/*.json`) with IndexedDB writes on top. Everything must be one keystroke from a pristine state (`Ctrl+Shift+D` → Reset everything).
+- **The product never narrates its own data.** No user-visible text, route, label or console message says "mock", "fake", "sample", "seed", "test data", "placeholder" or "hardcoded". (Code identifiers like `seed.ts` are fine.)
+- **The demo path is sacred:** Dashboard → Animal cell → Explore → `F` (find the mitochondrion) → back to the dashboard, where the session is at the top. From checkpoint C2 on, it must work at every commit on `main`.
+- **Never call a cloud API at runtime.** No Claude API and no hosted inference; Claude is a build tool only. The app works in airplane mode. The only optional runtime AI is local Ollama (step B9).
+- **Dependencies:** `react`, `react-dom`, `tailwindcss` + `@tailwindcss/vite`, `idb-keyval`, `qrcode`, with `vitest` for tests. Step B0 removes `@huggingface/transformers`, `tesseract.js`, `lz-string` and `vite-plugin-pwa`. Only Part B edits `package.json`.
+- **No router library** (a hash router in `App.tsx`), no state library, and no chart library (sparklines are inline SVG).
+- **Tests:** Vitest, with co-located `*.test.ts` for pure logic only (geometry, audio mapping, routes, db merge, answers, braille). No UI tests.
 
 ## Commands
-- `npm run models` — download/verify model files into `public/models/` (~540 MB, gitignored)
-- `npm run dev` — dev server
-- `npm run build && npm run preview` — the offline demo server
-- `npm test` — Vitest
 
-## Accessibility (decided before building)
-- **Screen-reader mode (default):** each region is a real element with an accessible name, positioned over the diagram, so VoiceOver/TalkBack's own touch exploration announces it. Also provide a plain-text list of regions and their neighbours.
-- **Self-voicing mode:** the user turns the screen reader off for this view; the app handles touch itself (edge ticks, spoken labels, double-tap for details).
-- Test both on a real iPhone (VoiceOver) and Android phone (TalkBack) early. It is unverified whether a mobile web page can get direct touch while VoiceOver is on — assume it cannot.
+```bash
+npm install
+npm run dev                          # http://localhost:5173
+npm test                             # vitest run
+npm run build && npm run preview     # http://localhost:4173, the ONLY thing used on stage
+```
 
-## Known risks
-- Florence-2 on Transformers.js **v4** is untested (the official WebGPU example used v3). Spike it first; if it fails, pin `@huggingface/transformers@3`.
-- Florence-2 uses `Florence2ForConditionalGeneration` + `AutoProcessor`, not `pipeline()`.
-- Never load Florence-2 on the phone; the phone only receives region JSON.
+## Skills and plugins
 
-## Skills in `.claude/skills/`
-- Plan: `brainstorming`, `writing-plans`, `executing-plans`, `subagent-driven-development`
-- Build: `transformers-js`, `frontend-design`, `pick-ui-library`, `prototype`, `mobile-native`, `minimalist-ui`
-- Test/debug: `test-driven-development` (hit-testing and region logic only), `systematic-debugging`, `verification-before-completion`
-- Polish: `emil-design-eng`, `animate`, `review-animations`, `apple-design`
-- Meta: `skill-creator` (for the planned `browser-ml-runtime` project skill)
-- Plugins (enabled in `.claude/settings.json`): playwright, context7, typescript-lsp, code-simplifier, claude-md-management
-
-## Rules
-- Build the demo path from fixtures first (a saved region JSON), then wire live models.
-- Keep 3–4 pre-tested diagrams (cell, US map, line graph, circuit) in `public/samples/`, from OpenStax (CC BY 4.0, attribute) or other clearly licensed sources.
-- Do not add any network call at runtime without asking.
+- Look: `minimalist-ui` (the only look skill). Polish: `emil-design-eng`, `animate`, `review-animations`. `apple-design` is optional, for pointer and motion feel.
+- Discipline: `verification-before-completion`, `systematic-debugging`, and `/ponytail-review` at each part's polish step.
+- Plugins in `.claude/settings.json`: playwright (demo-path smoke test), context7 (current docs, and Ollama for B9), typescript-lsp, code-simplifier.
+- Not relevant to this build: `transformers-js`, `mobile-native`, `brainstorming`, `writing-plans`. The plans are already written. Never invoke paid image-generation skills.

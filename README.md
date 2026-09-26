@@ -1,27 +1,29 @@
 # TouchSight
 
-Explore any textbook diagram by touch and sound. Runs fully in the browser, offline, with no paid APIs.
+Blind students explore any textbook diagram by sound, on the laptop they already have. Moving on the trackpad pans a tone left and right and raises its pitch toward the top; each part changes the timbre and speaks its name. Teachers trace and explain diagrams, assign them to classes, see progress, and export swell-paper braille graphics. Runs fully offline, for $0.
 
-Status: repo initialised with tooling, models and Claude skills. No product code yet; `src/` is still the Vite starter.
+## Run
 
-## Setup
 ```bash
 npm install
-npm run models   # downloads ~540 MB of model files into public/models (gitignored)
 npm run dev
 ```
 
-## What's here
-| Path | Contents |
-|---|---|
-| `CLAUDE.md` | Rules, stack, accessibility decisions, risks |
-| `docs/brief.md` | The idea, the two user flows, the build order and the demo script |
-| `docs/research-*.md` | The ranking and tech-stack research this project came from |
-| `.claude/skills/` | 18 vendored Claude skills (pinned in `skills-lock.json`) |
-| `.claude/settings.json` | Claude Code plugins to enable: playwright, context7, typescript-lsp, code-simplifier, claude-md-management |
-| `scripts/fetch-models.mjs` | Downloads Florence-2-base-ft, SlimSAM and Tesseract English data |
+Demo build: `npm run build && npm run preview`, then open http://localhost:4173.
 
-## Models (all free, open licences)
-- Florence-2-base-ft (MIT). The q4f16 files are for WebGPU and the q8 files are the WASM fallback.
-- SlimSAM-77-uniform (Apache-2.0).
-- Tesseract `eng` traineddata (Apache-2.0).
+## Docs
+
+| File | What |
+|---|---|
+| `CLAUDE.md` | Rules for every build session |
+| `docs/CONTRACT.md` | How the two parts fit together: ownership, types, routes, APIs, checkpoints |
+| `docs/PLAN-A-student.md` | Part A: the student explorer and sound |
+| `docs/PLAN-B-teacher.md` | Part B: the teacher workspace, data and app shell |
+| `docs/SPEC.md` | Features and acceptance criteria |
+| `docs/DESIGN.md` | Visual tokens, sound design, copy |
+| `docs/DEMO.md` | Pitch, fallbacks, Devpost draft, video shot list, sources |
+
+## Credits
+
+- Animal cell diagram: OpenStax Anatomy & Physiology (CC BY 4.0).
+- Map of Canada: Wikimedia Commons (public domain).
