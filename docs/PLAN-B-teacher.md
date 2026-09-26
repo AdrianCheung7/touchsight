@@ -104,14 +104,14 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - Keep the **single switch** `const AI_BACKEND = 'local' as 'local' | 'ollama'`; B9 adds the Ollama branch behind it.
 - **Verify:** unit test: "what does it do?" on the mitochondrion gives the `what` answer; "capital?" on BC gives Victoria; an unknown label never throws. **Merge to `main`: this is C1.** Tell Part A.
 
-## B3 · Dashboard, header, student page (~60 min)
+## B3 · Dashboard, header, student page (~60 min) ✅
 
-- [ ] `Header.tsx`: the "TouchSight" wordmark (serif), nav (Home · About), the high-contrast toggle (`data-contrast` on `<html>`, remembered in localStorage), and "Ms. Rivera" at the right.
-- [ ] `Home.tsx` (`#/`), per `DESIGN.md`:
+- [x] `Header.tsx`: the "TouchSight" wordmark (serif), nav (Home · About), the high-contrast toggle (`data-contrast` on `<html>`, remembered in localStorage), and "Ms. Rivera" at the right.
+- [x] `Home.tsx` (`#/`), per `DESIGN.md`:
   - **Library:** figure cards with thumbnail, title, subject · grade, and region count. Buttons: **Explore** (as guest), **Edit**. Plus **Upload a diagram**.
   - **Classes:** each class with its assignment ("Canada · due Thu"), and its students (name, the last activity as relative time, and a **Launch** button that opens the assigned figure as that student).
   - **Recent activity:** the last 8 sessions, e.g. "Guest found Mitochondrion in 14 s · just now". Relative times use `Intl.RelativeTimeFormat`, and the list reloads whenever the route returns to home.
-- [ ] `StudentPage.tsx` (`#/student/:id`): prefs (read-only), plus a find-time history per target as a small inline-SVG sparkline with the latest value labelled. There is no chart library.
+- [x] `StudentPage.tsx` (`#/student/:id`): prefs (read-only), plus a find-time history per target as a small inline-SVG sparkline with the latest value labelled. There is no chart library.
 - **Verify:**
   - keyboard only, the first Tab reaches "Explore Animal cell";
   - Launch opens A's explorer with the right `studentId`;
