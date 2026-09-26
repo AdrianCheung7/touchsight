@@ -29,26 +29,40 @@ src/teacher/Header.tsx    wordmark, nav, high-contrast toggle
 public/figures/animal-cell.jpg, canada.png
 ```
 
-## B0 · Contract commit (~25 min). Do this first; it's C0
+## Start here (the shared base is already on `main`)
 
-- [ ] Clean up the starter:
+Step B0 (the contract, router, design tokens, stub data layer and figure images) is **done and pushed**. You don't need anything from the other part to begin:
+
+```bash
+git checkout main && git pull
+git checkout -b b/teacher
+npm install
+npm run dev        # http://localhost:5173
+npm test
+```
+
+Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (CONTRACT §7), and keep every exported function signature identical.
+
+## B0 · Contract commit ✅ DONE (on `main`, checkpoint C0)
+
+- [x] Clean up the starter:
   - delete `src/App.css`, `src/assets/*` and `scripts/fetch-models.mjs`;
   - in `package.json`, remove the `models` script and uninstall `@huggingface/transformers tesseract.js lz-string vite-plugin-pwa`;
   - set the `test` script to `vitest run`;
   - update the comment in `vite.config.ts`.
-- [ ] `src/index.css`: the Tailwind v4 `@theme` tokens from `DESIGN.md`, with `[data-contrast="high"]` overrides, a base body style, and the focus-ring rule. Remove the starter variables.
-- [ ] `src/contract/types.ts` and `routes.ts`, **exactly** as in CONTRACT §3–4. Implement `parseRoute`, plus `routes.test.ts` covering all six routes and an unknown hash (→ home).
-- [ ] `src/App.tsx`: a `hashchange` router that renders B's pages and `<Explore …/>`.
-- [ ] Placeholder pages:
+- [x] `src/index.css`: the Tailwind v4 `@theme` tokens from `DESIGN.md`, with `[data-contrast="high"]` overrides, a base body style, and the focus-ring rule. Remove the starter variables.
+- [x] `src/contract/types.ts` and `routes.ts`, **exactly** as in CONTRACT §3–4. Implement `parseRoute`, plus `routes.test.ts` covering all six routes and an unknown hash (→ home).
+- [x] `src/App.tsx`: a `hashchange` router that renders B's pages and `<Explore …/>`.
+- [x] Placeholder pages:
   - B's pages: a heading only.
   - `src/student/Explore.tsx`: a heading plus the props shown. **Ownership passes to A at merge.**
-- [ ] **Working stubs:**
+- [x] **Working stubs:**
   - `db.ts` implements every CONTRACT §5 function in memory, with one figure `test-square` (400×400, one square region).
   - `ai.ts` resolves after 800 ms with the region's explanation.
-- [ ] Download the images into `public/figures/`:
+- [x] Download the images into `public/figures/`:
   - `animal-cell.jpg` ← https://upload.wikimedia.org/wikipedia/commons/0/0d/0312_Animal_Cell_and_Components.jpg
   - `canada.png` ← https://upload.wikimedia.org/wikipedia/commons/1/14/Political_map_of_Canada.png
-- **Verify:** `npm run build` and `npm test` pass. Every route renders. Merge to `main`, then **tell Part A that C0 is ready.**
+- **Verified:** `npm test` (routes), `npm run build` and `npx oxlint src` pass. Every route renders. The stub data layer works end to end (figure, guest, session recording, `askQuestion`, `deleteFigure` rejection).
 
 ## B1 · The database (~50 min)
 

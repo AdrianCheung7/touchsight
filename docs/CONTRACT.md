@@ -24,7 +24,7 @@ Every path in the repo has exactly one owner. **Never create, edit or delete a f
 | `docs/PLAN-B-teacher.md` | **B** | Tick your own boxes |
 | `CLAUDE.md`, `README.md`, `docs/SPEC.md`, `docs/DESIGN.md`, `docs/DEMO.md`, `docs/CONTRACT.md` | **Frozen** | Read-only during the build. Rehearsal edits to `DEMO.md` happen after the freeze. |
 
-**The one hand-over:** in step B0, B creates a placeholder `src/student/Explore.tsx` so the router compiles. From the moment B0 is merged, that file belongs to A, and B never touches `src/student/` again.
+**The one hand-over:** step B0 (now on `main`) created a placeholder `src/student/Explore.tsx` so the router compiles. That file now belongs to A, and B never touches `src/student/` again.
 
 ## 2. Git workflow
 
@@ -144,7 +144,7 @@ A hardcoded seed, with writes persisted in IndexedDB (`idb-keyval`). All functio
 
 | Checkpoint | When | B delivers to `main` | A delivers to `main` | Joint check (both, 5 min) |
 |---|---|---|---|---|
-| **C0 — Contract** | start + ~25 min | B0: contract files, router, tokens, **working stubs** of `db.ts` and `ai.ts` (one "Test square" figure), placeholder `Explore.tsx`, images in `public/figures/` | nothing (A is writing `audio.ts` and `geometry.ts`, which need no contract) | `npm run build` and `npm test` pass on `main` |
+| **C0 — Contract** ✅ done |  already on `main` | B0: contract files, router, tokens, **working stubs** of `db.ts` and `ai.ts` (one "Test square" figure), placeholder `Explore.tsx`, images in `public/figures/` | nothing (A is writing `audio.ts` and `geometry.ts`, which need no contract) | `npm run build` and `npm test` pass on `main` |
 | **C1 — Real data** | start + ~1:30 | B1 + B2: the real DB with the hand-traced **animal cell** and **Canada**, the seeded classroom, the AI answer table | A1–A3: explorer shell with pointer lock and the audio cursor | Open `#/explore/animal-cell?student=guest`, find the nucleus by ear |
 | **C2 — Full loop** | start + ~4:00 | B3–B5: dashboard, editor, upload | A4–A6: keys, find-it with `recordSession`, the `A` question | Dashboard → Explore → find the mitochondrion → back to the dashboard → the new session tops Recent activity. Editor → rename a region → Preview → the new name is spoken. |
 | **C3 — Freeze candidate** | 07:15 | B6–B8: export, about, demo panel, accessibility and polish | A7–A8: accessibility and polish | Full `DEMO.md` run-through on the demo laptop in airplane mode |

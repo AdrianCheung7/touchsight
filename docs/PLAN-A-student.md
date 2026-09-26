@@ -21,7 +21,25 @@ src/student/geometry.test.ts
 
 Keep to these six files. Split only if a file passes about 300 lines.
 
-## A1 · Audio engine (~35 min). Start immediately; needs no contract
+## Start here (the shared base is already on `main`)
+
+Step B0 (the contract, router, design tokens, stub data layer and figure images) is **done and pushed**. You don't need anything from the other part to begin:
+
+```bash
+git checkout main && git pull
+git checkout -b a/student
+npm install
+npm run dev        # http://localhost:5173
+npm test
+```
+
+What's already there for you:
+- `src/student/Explore.tsx`: a placeholder with the final props. **It's yours now**; replace it in A3.
+- `src/contract/`: the types and `href` / `parseRoute` (read-only).
+- `src/data/db.ts` / `ai.ts`: working in-memory stubs with the final signatures. Until checkpoint C1 there is one figure, **`test-square`** (400×400): a frame, a big circle containing a small circle (to test nesting), and a triangle. Develop at `http://localhost:5173/#/explore/test-square?student=guest`. From C1, use `#/explore/animal-cell?student=guest`. Your code doesn't change.
+- `src/index.css`: the design tokens as Tailwind classes (`bg-stage`, `text-accent`, `font-mono`…).
+
+## A1 · Audio engine (~35 min)
 
 - [ ] `audio.ts`, exactly per the `DESIGN.md` sound table: one lazily created `AudioContext`, and a persistent position voice (osc → gain → panner → master 0.6).
   - `setPosition(x, y, w, h)` and `setInside(bool)` (triangle + 6 Hz tremolo) drive the voice. It fades out after 150 ms without movement.
@@ -42,7 +60,6 @@ Keep to these six files. Split only if a file passes about 300 lines.
   - `clamp(p, w, h)`: returns `{ p, hitWall }`.
 - **Verify:** tests cover a nested case (a point in both the nucleolus and the nucleus returns the nucleolus), a point on background, a concave polygon, all nine `whereAmI` cells, and the reading order of four points. `npm test` passes.
 
-## Checkpoint C0: merge `main` (contract + stubs are now there)
 
 ## A3 · Explorer shell + audio cursor (~70 min). The wow; it must be excellent
 
@@ -64,7 +81,7 @@ Keep to these six files. Split only if a file passes about 300 lines.
   - after `Esc` the page is fully usable;
   - it works in Chrome **and** Edge.
 
-## Checkpoint C1: merge `main` (the real animal cell + Canada arrive; nothing to change on your side)
+## Checkpoint C1: merge `main` (the real animal cell and Canada arrive, and `test-square` disappears; switch your dev URL to `#/explore/animal-cell?student=guest`. No code changes.)
 
 ## A4 · Keys, modes, prefs (~40 min)
 
