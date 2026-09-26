@@ -1,0 +1,414 @@
+{
+  "id": "animal-cell",
+  "title": "Animal cell",
+  "subject": "Science",
+  "gradeBand": "Grade 7",
+  "image": "/figures/animal-cell.jpg",
+  "width": 813,
+  "height": 645,
+  "source": {
+    "credit": "OpenStax, Anatomy & Physiology (Rice University)",
+    "license": "CC BY 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:0312_Animal_Cell_and_Components.jpg"
+  },
+  "regions": [
+    {
+      "id": "plasma-membrane",
+      "label": "Plasma membrane",
+      "polygon": [
+        [406, 20],
+        [513, 41],
+        [631, 131],
+        [672, 230],
+        [671, 335],
+        [607, 462],
+        [560, 504],
+        [543, 504],
+        [537, 482],
+        [519, 480],
+        [512, 493],
+        [526, 506],
+        [525, 521],
+        [444, 576],
+        [372, 600],
+        [285, 599],
+        [190, 569],
+        [148, 535],
+        [121, 466],
+        [125, 372],
+        [173, 238],
+        [238, 136],
+        [256, 113],
+        [327, 49]
+      ],
+      "labelAnchor": [569, 97],
+      "explanation": "The plasma membrane is the thin skin around the cell. It controls what goes in and what comes out.",
+      "origin": "teacher"
+    },
+    {
+      "id": "cytoplasm",
+      "label": "Cytoplasm",
+      "polygon": [
+        [406, 39],
+        [497, 54],
+        [570, 100],
+        [616, 142],
+        [638, 179],
+        [653, 230],
+        [653, 330],
+        [601, 437],
+        [556, 484],
+        [541, 463],
+        [511, 463],
+        [493, 484],
+        [506, 513],
+        [433, 561],
+        [365, 582],
+        [285, 580],
+        [183, 545],
+        [158, 516],
+        [138, 451],
+        [148, 354],
+        [190, 245],
+        [247, 158],
+        [268, 128],
+        [329, 69]
+      ],
+      "labelAnchor": [258, 560],
+      "explanation": "Cytoplasm is the jelly that fills the cell. All the other parts float in it.",
+      "origin": "teacher"
+    },
+    {
+      "id": "nucleus",
+      "label": "Nucleus",
+      "polygon": [
+        [272, 259],
+        [304, 261],
+        [330, 270],
+        [367, 302],
+        [372, 362],
+        [364, 391],
+        [342, 416],
+        [315, 425],
+        [264, 425],
+        [234, 409],
+        [214, 384],
+        [203, 332],
+        [212, 309],
+        [240, 274]
+      ],
+      "labelAnchor": [262, 280],
+      "explanation": "The nucleus is the control centre of the cell. It holds the DNA, the instructions that tell the cell what to do.",
+      "origin": "teacher"
+    },
+    {
+      "id": "nucleolus",
+      "label": "Nucleolus",
+      "polygon": [
+        [258, 298],
+        [275, 300],
+        [286, 310],
+        [291, 321],
+        [286, 342],
+        [266, 354],
+        [250, 351],
+        [230, 327],
+        [235, 324],
+        [240, 310]
+      ],
+      "labelAnchor": [264, 326],
+      "explanation": "The nucleolus is a dark spot inside the nucleus. It builds ribosomes, the tiny machines that make proteins.",
+      "origin": "teacher"
+    },
+    {
+      "id": "chromatin",
+      "label": "Chromatin",
+      "polygon": [
+        [218, 352],
+        [250, 358],
+        [290, 356],
+        [330, 350],
+        [362, 345],
+        [360, 375],
+        [350, 398],
+        [330, 412],
+        [300, 418],
+        [268, 416],
+        [240, 404],
+        [224, 385]
+      ],
+      "labelAnchor": [246, 375],
+      "explanation": "Chromatin is DNA wound into long threads inside the nucleus. It stores the instructions for building the whole body.",
+      "origin": "teacher"
+    },
+    {
+      "id": "rough-endoplasmic-reticulum",
+      "label": "Rough endoplasmic reticulum",
+      "polygon": [
+        [230, 213],
+        [262, 205],
+        [354, 189],
+        [426, 236],
+        [433, 423],
+        [371, 451],
+        [308, 454],
+        [300, 436],
+        [262, 432],
+        [160, 370],
+        [175, 292],
+        [207, 248]
+      ],
+      "labelAnchor": [240, 222],
+      "explanation": "The rough endoplasmic reticulum is a set of folded tubes around the nucleus. Ribosomes on its surface make proteins here.",
+      "origin": "teacher"
+    },
+    {
+      "id": "smooth-endoplasmic-reticulum",
+      "label": "Smooth endoplasmic reticulum",
+      "polygon": [
+        [456, 300],
+        [479, 327],
+        [490, 388],
+        [484, 395],
+        [465, 390],
+        [454, 408],
+        [429, 413],
+        [425, 327],
+        [431, 310],
+        [445, 311]
+      ],
+      "labelAnchor": [453, 350],
+      "explanation": "The smooth endoplasmic reticulum is a set of tubes with no ribosomes. It makes fats and helps clear harmful things out of the cell.",
+      "origin": "teacher"
+    },
+    {
+      "id": "ribosomes",
+      "label": "Ribosomes",
+      "polygon": [
+        [266, 163],
+        [285, 154],
+        [302, 145],
+        [316, 146],
+        [318, 156],
+        [300, 162],
+        [296, 172],
+        [272, 176]
+      ],
+      "labelAnchor": [306, 153],
+      "explanation": "Ribosomes are tiny dots that build proteins. Some float free in the cytoplasm, and others stick to the rough endoplasmic reticulum.",
+      "origin": "teacher"
+    },
+    {
+      "id": "mitochondrion",
+      "label": "Mitochondrion",
+      "polygon": [
+        [426, 62],
+        [440, 63],
+        [455, 75],
+        [458, 88],
+        [451, 101],
+        [432, 115],
+        [412, 120],
+        [387, 140],
+        [363, 136],
+        [359, 120],
+        [371, 98]
+      ],
+      "labelAnchor": [423, 92],
+      "explanation": "The mitochondrion is the power plant of the cell. It turns food and oxygen into energy the cell can use.",
+      "origin": "teacher"
+    },
+    {
+      "id": "golgi-apparatus",
+      "label": "Golgi apparatus",
+      "polygon": [
+        [178, 417],
+        [250, 439],
+        [285, 459],
+        [310, 477],
+        [308, 492],
+        [285, 497],
+        [255, 514],
+        [238, 519],
+        [228, 497],
+        [212, 484],
+        [180, 481],
+        [172, 468],
+        [158, 448],
+        [176, 433]
+      ],
+      "labelAnchor": [200, 445],
+      "explanation": "The Golgi apparatus is a stack of flat sacs. Like a post office, it packs proteins and sends them where they need to go.",
+      "origin": "teacher"
+    },
+    {
+      "id": "golgi-vesicle",
+      "label": "Golgi vesicle",
+      "polygon": [
+        [190, 486],
+        [204, 487],
+        [210, 499],
+        [222, 510],
+        [223, 528],
+        [210, 532],
+        [198, 524],
+        [185, 519],
+        [184, 505],
+        [188, 495]
+      ],
+      "labelAnchor": [197, 496],
+      "explanation": "Golgi vesicles are small bubbles that carry packed proteins away from the Golgi apparatus.",
+      "origin": "teacher"
+    },
+    {
+      "id": "vacuole",
+      "label": "Vacuole",
+      "polygon": [
+        [300, 520],
+        [331, 521],
+        [347, 529],
+        [362, 548],
+        [362, 567],
+        [351, 575],
+        [335, 576],
+        [276, 559],
+        [269, 550],
+        [272, 535]
+      ],
+      "labelAnchor": [321, 546],
+      "explanation": "A vacuole is a storage bubble. It holds water, food or waste until the cell needs it.",
+      "origin": "teacher"
+    },
+    {
+      "id": "peroxisome",
+      "label": "Peroxisome",
+      "polygon": [
+        [420, 474],
+        [429, 474],
+        [444, 486],
+        [469, 490],
+        [475, 501],
+        [472, 514],
+        [453, 522],
+        [437, 510],
+        [412, 506],
+        [406, 490]
+      ],
+      "labelAnchor": [457, 505],
+      "explanation": "Peroxisomes are small bubbles that break down fats and get rid of harmful chemicals.",
+      "origin": "teacher"
+    },
+    {
+      "id": "lysosome",
+      "label": "Lysosome",
+      "polygon": [
+        [547, 369],
+        [559, 372],
+        [570, 390],
+        [596, 385],
+        [606, 394],
+        [603, 410],
+        [576, 435],
+        [560, 429],
+        [558, 406],
+        [535, 388]
+      ],
+      "labelAnchor": [592, 400],
+      "explanation": "Lysosomes are the clean-up crew of the cell. They break down worn-out parts and germs.",
+      "origin": "teacher"
+    },
+    {
+      "id": "centrosome",
+      "label": "Centrosome",
+      "polygon": [
+        [479, 242],
+        [505, 238],
+        [520, 244],
+        [522, 258],
+        [514, 281],
+        [529, 307],
+        [510, 320],
+        [469, 254]
+      ],
+      "labelAnchor": [505, 262],
+      "explanation": "The centrosome sits near the nucleus. It helps pull the DNA apart when the cell divides in two.",
+      "origin": "teacher"
+    },
+    {
+      "id": "microtubule",
+      "label": "Microtubule",
+      "polygon": [
+        [551, 177],
+        [583, 171],
+        [592, 178],
+        [530, 250],
+        [520, 248],
+        [513, 238]
+      ],
+      "labelAnchor": [566, 196],
+      "explanation": "Microtubules are hollow tubes that help the cell keep its shape. They also work like tracks for moving things around.",
+      "origin": "teacher"
+    },
+    {
+      "id": "microfilament",
+      "label": "Microfilament",
+      "polygon": [
+        [570, 145],
+        [600, 172],
+        [621, 207],
+        [631, 256],
+        [634, 305],
+        [628, 343],
+        [617, 376],
+        [631, 380],
+        [642, 347],
+        [648, 305],
+        [645, 254],
+        [635, 203],
+        [610, 164],
+        [580, 135]
+      ],
+      "labelAnchor": [640, 300],
+      "explanation": "Microfilaments are very thin threads just inside the membrane. They help the cell move and change shape.",
+      "origin": "teacher"
+    },
+    {
+      "id": "intermediate-filament",
+      "label": "Intermediate filament",
+      "polygon": [
+        [211, 234],
+        [254, 189],
+        [304, 145],
+        [354, 105],
+        [391, 69],
+        [383, 61],
+        [346, 95],
+        [296, 135],
+        [246, 181],
+        [203, 226]
+      ],
+      "labelAnchor": [345, 101],
+      "explanation": "Intermediate filaments are strong ropes inside the cell. They help it hold its shape when it is pushed or pulled.",
+      "origin": "teacher"
+    },
+    {
+      "id": "secretory-vesicle",
+      "label": "Secretory vesicle",
+      "polygon": [
+        [505, 470],
+        [520, 462],
+        [540, 465],
+        [552, 478],
+        [550, 495],
+        [535, 508],
+        [518, 515],
+        [505, 505],
+        [500, 488]
+      ],
+      "labelAnchor": [524, 490],
+      "explanation": "A secretory vesicle is a bubble that carries things to the edge of the cell and lets them out.",
+      "origin": "teacher"
+    }
+  ],
+  "updatedAt": "2026-09-26T00:00:00.000Z"
+}

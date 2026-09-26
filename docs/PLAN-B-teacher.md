@@ -64,14 +64,14 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - `canada.png` ← https://upload.wikimedia.org/wikipedia/commons/1/14/Political_map_of_Canada.png
 - **Verified:** `npm test` (routes), `npm run build` and `npx oxlint src` pass. Every route renders. The stub data layer works end to end (figure, guest, session recording, `askQuestion`, `deleteFigure` rejection).
 
-## B1 · The database (~50 min)
+## B1 · The database (~50 min) ✅
 
-- [ ] `figures/animal-cell.json`: open `animal-cell.jpg` and trace **every labelled structure** (8–14 points each, tracing the structure, **not** its label text), plus `labelAnchor` and a grade-5 explanation of 30 words or fewer.
+- [x] `figures/animal-cell.json`: open `animal-cell.jpg` and trace **every labelled structure** (8–14 points each, tracing the structure, **not** its label text), plus `labelAnchor` and a grade-5 explanation of 30 words or fewer.
   - `mitochondrion` is required (it's the hero target).
   - The cytoplasm or cell membrane is the large outer region; smallest-area-wins makes the organelles hit first.
   - Metadata: `subject: "Science"`, `gradeBand: "Grade 7"`, and the `source` with credit and license.
-- [ ] `figures/canada.json`: 13 provinces and territories. Explanations give the capital plus one kid-friendly fact. PEI gets a slightly generous polygon. Metadata: `subject: "Social Studies"`, `gradeBand: "Grade 5"`, `source` = public domain.
-- [ ] `seed.ts`, the hardcoded database. **Everything is relative to `Date.now()` at load time**, so it never looks stale.
+- [x] `figures/canada.json`: 13 provinces and territories. Explanations give the capital plus one kid-friendly fact. PEI gets a slightly generous polygon. Metadata: `subject: "Social Studies"`, `gradeBand: "Grade 5"`, `source` = public domain.
+- [x] `seed.ts`, the hardcoded database. **Everything is relative to `Date.now()` at load time**, so it never looks stale.
   - `teacher: "Ms. Rivera"`.
   - Classes: "Grade 5 · Room 12" and "Grade 7 · Science".
   - 6 students, 3 per class, fictional first name plus last initial. Give 2 of them `screenReaderMode: true` and vary the sensitivity. Never use a name or detail from the pitch story.
@@ -80,12 +80,12 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
     - several targets per student;
     - times that realistically fall with practice (for example, a student's mitochondrion times go 52 → 31 → 19 s);
     - no session in the last hour, so the judge's live session is clearly the newest.
-- [ ] `db.ts`, the real implementation:
+- [x] `db.ts`, the real implementation:
   - The seed is the base. Writes go to `idb-keyval`: keys `fig:<id>`, `prefs:<studentId>`, and `sessions` (an appended array).
   - Reads merge the two: a saved figure wins, prefs override, sessions = seed + saved, sorted newest first.
   - `resetDemo()` clears the IndexedDB store.
   - Validate figures read from storage at this trust boundary: drop invalid regions with a `console.warn`.
-- [ ] `db.test.ts`, using `idb-keyval`'s `createStore` with an in-memory fallback, or by mocking the module:
+- [x] `db.test.ts`, using `idb-keyval`'s `createStore` with an in-memory fallback, or by mocking the module:
   - a saved figure overrides the seed;
   - `recordSession` then `listSessions` puts it first;
   - `resetDemo` restores the seed;

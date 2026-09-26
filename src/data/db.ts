@@ -1,5 +1,7 @@
-// Part B. STUB from checkpoint C0: in-memory, one test figure. Step B1 replaces the internals
-// (seed + idb-keyval) behind these exact signatures (docs/CONTRACT.md §5) — callers never change.
+// Part B. The app's database (docs/CONTRACT.md §5): the built-in classroom from seed.ts,
+// with every write kept in IndexedDB (idb-keyval) and merged on top when read.
+// Keys: `fig:<id>`, `prefs:<studentId>`, `sessions` (appended array).
+import { clear, del, entries, get, set, update } from 'idb-keyval'
 import {
   DEFAULT_PREFS,
   GUEST_ID,
@@ -7,139 +9,106 @@ import {
   type ClassRoom,
   type Figure,
   type Point,
+  type Region,
   type Session,
   type Student,
   type StudentPrefs,
 } from '../contract/types.ts'
-
-// Points approximating a circle, for the test figure.
-const circle = (cx: number, cy: number, r: number, n = 16): Point[] =>
-  Array.from({ length: n }, (_, i) => {
-    const a = (i / n) * 2 * Math.PI
-    return [Math.round(cx + r * Math.cos(a)), Math.round(cy + r * Math.sin(a))]
-  })
-
-const TEST_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-<rect width="400" height="400" fill="#fff"/>
-<rect x="20" y="20" width="360" height="360" fill="#eef" stroke="#333" stroke-width="3"/>
-<circle cx="150" cy="160" r="90" fill="#fdd" stroke="#333" stroke-width="3"/>
-<circle cx="150" cy="160" r="30" fill="#f99" stroke="#333" stroke-width="3"/>
-<polygon points="260,300 340,300 300,230" fill="#dfd" stroke="#333" stroke-width="3"/>
-</svg>`
-
-const testFigure: Figure = {
-  id: 'test-square',
-  title: 'Test square',
-  subject: 'Science',
-  gradeBand: 'Grade 7',
-  image: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(TEST_SVG)}`,
-  width: 400,
-  height: 400,
-  regions: [
-    {
-      id: 'frame',
-      label: 'Frame',
-      polygon: [[20, 20], [380, 20], [380, 380], [20, 380]],
-      labelAnchor: [360, 40],
-      explanation: 'The frame is the big square that holds everything else.',
-      origin: 'teacher',
-    },
-    {
-      id: 'big-circle',
-      label: 'Big circle',
-      polygon: circle(150, 160, 90),
-      labelAnchor: [150, 100],
-      explanation: 'The big circle sits in the upper left and has a small circle inside it.',
-      origin: 'teacher',
-    },
-    {
-      id: 'small-circle',
-      label: 'Small circle',
-      polygon: circle(150, 160, 30),
-      labelAnchor: [150, 160],
-      explanation: 'The small circle is inside the big circle.',
-      origin: 'teacher',
-    },
-    {
-      id: 'triangle',
-      label: 'Triangle',
-      polygon: [[260, 300], [340, 300], [300, 230]],
-      labelAnchor: [300, 280],
-      explanation: 'The triangle is in the lower right corner.',
-      origin: 'teacher',
-    },
-  ],
-  updatedAt: new Date().toISOString(),
-}
-
-const figures: Figure[] = [testFigure]
-const classes: ClassRoom[] = [{ id: 'c1', name: 'Grade 7 · Science', teacher: 'Ms. Rivera' }]
-const students: Student[] = [{ id: 's1', name: 'Student 1', classId: 'c1', prefs: { ...DEFAULT_PREFS } }]
-const assignments: Assignment[] = [{ id: 'a1', classId: 'c1', figureId: 'test-square', due: new Date().toISOString() }]
-const sessions: Session[] = []
-const guestPrefs: { value: StudentPrefs } = { value: { ...DEFAULT_PREFS } }
+import * as seed from './seed.ts'
 
 const clone = <T>(x: T): T => structuredClone(x)
+const isPoint = (p: unknown): p is Point => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite)
+
+// Trust boundary: stored figures may be old or hand-edited. Drop anything that would break hit-testing.
+function checkFigure(f: unknown): Figure | undefined {
+  const x = f as Figure | undefined
+  if (!x || typeof x.id !== 'string' || typeof x.image !== 'string' || !(x.width > 0) || !(x.height > 0) || !Array.isArray(x.regions)) {
+    console.warn('TouchSight: ignored an unreadable figure', x?.id)
+    return undefined
+  }
+  const regions = x.regions.filter((r: Region) => {
+    const ok = !!r && typeof r.id === 'string' && typeof r.label === 'string' && Array.isArray(r.polygon) && r.polygon.length >= 3 && r.polygon.every(isPoint) && isPoint(r.labelAnchor)
+    if (!ok) console.warn(`TouchSight: dropped an invalid region in "${x.id}"`, r)
+    return ok
+  })
+  return {
+    ...x,
+    title: String(x.title ?? ''),
+    subject: String(x.subject ?? ''),
+    gradeBand: String(x.gradeBand ?? ''),
+    regions: regions.map((r) => ({ ...r, explanation: String(r.explanation ?? ''), origin: r.origin === 'ai' ? 'ai' : 'teacher' })),
+  }
+}
+
+async function savedFigures(): Promise<Figure[]> {
+  const all = await entries<string, unknown>()
+  return all.filter(([k]) => String(k).startsWith('fig:')).flatMap(([, v]) => checkFigure(v) ?? [])
+}
+
+const newestFirst = <T extends { at?: string; updatedAt?: string }>(a: T, b: T) =>
+  (b.at ?? b.updatedAt ?? '').localeCompare(a.at ?? a.updatedAt ?? '')
 
 export async function listFigures(): Promise<Figure[]> {
-  return clone(figures)
+  const saved = await savedFigures()
+  const ids = new Set(saved.map((f) => f.id))
+  return [...saved, ...clone(seed.figures.filter((f) => !ids.has(f.id)))].sort(newestFirst)
 }
 
 export async function getFigure(id: string): Promise<Figure | undefined> {
-  return clone(figures.find((f) => f.id === id))
+  const saved = await get(`fig:${id}`)
+  return saved !== undefined ? checkFigure(saved) : clone(seed.figures.find((f) => f.id === id))
 }
 
 export async function saveFigure(f: Figure): Promise<void> {
-  const saved = { ...clone(f), updatedAt: new Date().toISOString() }
-  const i = figures.findIndex((x) => x.id === f.id)
-  if (i >= 0) figures[i] = saved
-  else figures.unshift(saved)
+  await set(`fig:${f.id}`, { ...clone(f), updatedAt: new Date().toISOString() })
 }
 
 export async function deleteFigure(id: string): Promise<void> {
-  if (id === testFigure.id) throw new Error('Built-in figures cannot be deleted')
-  const i = figures.findIndex((f) => f.id === id)
-  if (i >= 0) figures.splice(i, 1)
+  if (seed.figures.some((f) => f.id === id)) throw new Error('Built-in figures cannot be deleted')
+  await del(`fig:${id}`)
 }
 
 export async function listClasses(): Promise<ClassRoom[]> {
-  return clone(classes)
+  return clone(seed.classes)
+}
+
+async function prefsFor(id: string, base: StudentPrefs): Promise<StudentPrefs> {
+  const saved = await get<Partial<StudentPrefs>>(`prefs:${id}`)
+  return { ...base, ...(saved && typeof saved === 'object' ? saved : {}) }
 }
 
 export async function listStudents(classId?: string): Promise<Student[]> {
-  return clone(students.filter((s) => !classId || s.classId === classId))
+  const list = seed.students.filter((s) => !classId || s.classId === classId)
+  return Promise.all(list.map(async (s) => ({ ...clone(s), prefs: await prefsFor(s.id, s.prefs) })))
 }
 
 export async function getStudent(id: string): Promise<Student | undefined> {
-  if (id === GUEST_ID) return { id: GUEST_ID, name: 'Guest', classId: '', prefs: clone(guestPrefs.value) }
-  return clone(students.find((s) => s.id === id))
+  if (id === GUEST_ID) return { id: GUEST_ID, name: 'Guest', classId: '', prefs: await prefsFor(GUEST_ID, DEFAULT_PREFS) }
+  const s = seed.students.find((x) => x.id === id)
+  return s && { ...clone(s), prefs: await prefsFor(id, s.prefs) }
 }
 
 export async function saveStudentPrefs(id: string, prefs: StudentPrefs): Promise<void> {
-  if (id === GUEST_ID) guestPrefs.value = clone(prefs)
-  const s = students.find((x) => x.id === id)
-  if (s) s.prefs = clone(prefs)
+  await set(`prefs:${id}`, clone(prefs))
 }
 
 export async function listAssignments(classId?: string): Promise<Assignment[]> {
-  return clone(assignments.filter((a) => !classId || a.classId === classId))
+  return clone(seed.assignments.filter((a) => !classId || a.classId === classId))
 }
 
 export async function listSessions(f: { studentId?: string; figureId?: string } = {}): Promise<Session[]> {
-  return clone(
-    sessions
-      .filter((s) => (!f.studentId || s.studentId === f.studentId) && (!f.figureId || s.figureId === f.figureId))
-      .sort((a, b) => b.at.localeCompare(a.at)),
-  )
+  const saved = (await get<Session[]>('sessions')) ?? []
+  return [...clone(seed.sessions), ...(Array.isArray(saved) ? saved : [])]
+    .filter((s) => (!f.studentId || s.studentId === f.studentId) && (!f.figureId || s.figureId === f.figureId))
+    .sort(newestFirst)
 }
 
 export async function recordSession(s: Omit<Session, 'id' | 'at'>): Promise<Session> {
-  const session: Session = { ...s, id: crypto.randomUUID(), at: new Date().toISOString() }
-  sessions.push(session)
+  const session: Session = { ...s, seconds: Math.round(s.seconds), id: crypto.randomUUID(), at: new Date().toISOString() }
+  await update<Session[]>('sessions', (old) => [...(Array.isArray(old) ? old : []), session])
   return clone(session)
 }
 
 export async function resetDemo(): Promise<void> {
-  sessions.length = 0
-  guestPrefs.value = { ...DEFAULT_PREFS }
+  await clear()
 }
