@@ -10,6 +10,7 @@ const PAGE_H = 279.4
 const M = 15
 const CONTENT_W = PAGE_W - 2 * M
 const PAD = 1 // mm of blank paper around each braille label, so outlines don't run into the dots
+const LABEL_GAP = 4 // mm between label boxes: with PAD, dots of neighbouring labels stay a blank cell apart
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const f = (n: number) => n.toFixed(2)
@@ -57,6 +58,21 @@ export function exportSvg(fig: Figure): { svg: string; keys: { n: number; label:
 
   const keys: { n: number; label: string }[] = []
   const labels: string[] = []
+  const leaders: string[] = []
+  // Label boxes (mm, padding included) already on the page. Keep LABEL_GAP between them: closer than about a
+  // blank cell, two labels read by finger as one word.
+  const placed: [number, number, number, number][] = []
+  const clear = (x: number, y: number, w: number, h: number) =>
+    x >= M &&
+    y >= top &&
+    x + w <= PAGE_W - M &&
+    y + h <= bottom &&
+    placed.every(([a, b, c, d]) => x + w + LABEL_GAP <= a || a + c + LABEL_GAP <= x || y + h + LABEL_GAP <= b || b + d + LABEL_GAP <= y)
+  const place = (cx: number, cy: number, cells: Cell[]) => {
+    const w = brailleWidth(cells) + 2 * PAD
+    placed.push([cx - w / 2, cy - (CELL_HEIGHT + 2 * PAD) / 2, w, CELL_HEIGHT + 2 * PAD])
+    labels.push(label(cx - w / 2 + PAD, cy - CELL_HEIGHT / 2, cells))
+  }
   // Does a w×h mm label centred at (cx, cy) sit wholly on this part (not on a smaller one inside it)?
   const fitsAt = (id: string, cx: number, cy: number, w: number, h: number) => {
     for (let dx = -w / 2; dx <= w / 2 + 0.01; dx += Math.min(3, w / 2)) {
@@ -64,32 +80,50 @@ export function exportSvg(fig: Figure): { svg: string; keys: { n: number; label:
     }
     return true
   }
+  const h = CELL_HEIGHT + 2 * PAD
 
-  for (const r of fig.regions) {
+  // Pass 1: the whole label in braille, at the free spot nearest the anchor where it fits inside its own part.
+  const keyed = fig.regions.filter((r) => {
     const [ax, ay] = mm(r.labelAnchor)
     const cells = cellsFor(r.label)
     const w = brailleWidth(cells) + 2 * PAD
-    const h = CELL_HEIGHT + 2 * PAD
-    // The spot nearest the anchor where the whole label fits, else a key number at the anchor.
     let spot: Point | undefined
     const pts = r.polygon.map(mm)
     const [minX, maxX] = [Math.min(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[0]))]
     const [minY, maxY] = [Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[1]))]
     for (let x = minX + w / 2; x <= maxX - w / 2; x += 1.5) {
       for (let y = minY + h / 2; y <= maxY - h / 2; y += 1.5) {
-        if ((!spot || Math.hypot(x - ax, y - ay) < Math.hypot(spot[0] - ax, spot[1] - ay)) && fitsAt(r.id, x, y, w, h)) spot = [x, y]
+        const nearer = !spot || Math.hypot(x - ax, y - ay) < Math.hypot(spot[0] - ax, spot[1] - ay)
+        if (nearer && clear(x - w / 2, y - h / 2, w, h) && fitsAt(r.id, x, y, w, h)) spot = [x, y]
       }
     }
-    // ponytail: key numbers aren't collision-checked against each other — move an anchor in the editor if two touch
-    const text = spot ? cells : cellsFor(String(keys.length + 1))
-    if (!spot) keys.push({ n: keys.length + 1, label: r.label })
-    const [cx, cy] = spot ?? [ax, ay]
-    const tw = brailleWidth(text)
-    const x = Math.min(Math.max(cx - tw / 2, M), PAGE_W - M - tw)
-    const y = Math.min(Math.max(cy - CELL_HEIGHT / 2, top), bottom - CELL_HEIGHT)
-    labels.push(label(x, y, text))
-  }
-  out.push(...labels)
+    if (spot) place(spot[0], spot[1], cells)
+    return !spot
+  })
+
+  // Pass 2: a key number at the nearest free spot, inside its part if possible, else nearby with a leader line.
+  keyed.forEach((r, i) => {
+    keys.push({ n: i + 1, label: r.label })
+    const cells = cellsFor(String(i + 1))
+    const w = brailleWidth(cells) + 2 * PAD
+    const [ax, ay] = mm(r.labelAnchor)
+    const spots: [number, number, number][] = []
+    for (let rad = 0; rad <= 40; rad++) {
+      const steps = rad ? Math.ceil((2 * Math.PI * rad) / 1.5) : 1
+      for (let k = 0; k < steps; k++) {
+        const cx = ax + rad * Math.cos((2 * Math.PI * k) / steps)
+        const cy = ay + rad * Math.sin((2 * Math.PI * k) / steps)
+        spots.push([cx, cy, rad + (hit(px(cx, cy)) === r.id ? 0 : 12)])
+      }
+    }
+    spots.sort((a, b) => a[2] - b[2])
+    const [cx, cy] = spots.find(([x, y]) => clear(x - w / 2, y - h / 2, w, h)) ?? [ax, ay]
+    // Leader from the part to the number when the number had to move off it.
+    const [lx, ly] = [Math.min(Math.max(ax, cx - w / 2), cx + w / 2), Math.min(Math.max(ay, cy - h / 2), cy + h / 2)]
+    if (Math.hypot(lx - ax, ly - ay) > 1.5) leaders.push(`<line x1="${f(ax)}" y1="${f(ay)}" x2="${f(lx)}" y2="${f(ly)}" stroke="#000" stroke-width="0.5"/>`)
+    place(cx, cy, cells)
+  })
+  out.push(...leaders, ...labels)
 
   const caption = `${fig.title}${fig.subject ? ` · ${fig.subject}` : ''}${fig.gradeBand ? ` · ${fig.gradeBand}` : ''}${keys.length ? ' · Key on page 2' : ''}`
   out.push(`<text x="${M}" y="${f(PAGE_H - M)}" font-size="4.2" font-family="Helvetica, Arial, sans-serif">${esc(caption)}</text>`)

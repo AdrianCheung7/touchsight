@@ -35,6 +35,19 @@ describe('swell-paper export', () => {
     for (const p of outlines) expect(p).toContain('fill="none" stroke="#000" stroke-width="0.8"')
   })
 
+  it('keeps braille labels at least 4 mm apart (closer, two labels read as one word by finger)', () => {
+    for (const fig of [cellJson, canadaJson] as Figure[]) {
+      const boxes = [...exportSvg(fig).svg.matchAll(/<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#fff"\/>/g)].map((m) => m.slice(1).map(Number))
+      expect(boxes.length).toBe(fig.regions.length)
+      for (const [i, a] of boxes.entries()) {
+        for (const b of boxes.slice(i + 1)) {
+          const overlap = Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]) > -3.99 && Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]) > -3.99
+          expect(overlap, `${fig.id}: ${a} vs ${b}`).toBe(false)
+        }
+      }
+    }
+  })
+
   it('uses key numbers for parts too small for their label, listed on a key page', () => {
     expect(keys.map((k) => k.label)).toContain('Ribosomes')
     expect(svg).toContain('height="558.80mm"') // two pages
