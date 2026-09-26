@@ -41,13 +41,13 @@ What's already there for you:
 
 ## A1 · Audio engine (~35 min)
 
-- [ ] `audio.ts`, exactly per the `DESIGN.md` sound table: one lazily created `AudioContext`, and a persistent position voice (osc → gain → panner → master 0.6).
+- [x] `audio.ts`, exactly per the `DESIGN.md` sound table: one lazily created `AudioContext`, and a persistent position voice (osc → gain → panner → master 0.6).
   - `setPosition(x, y, w, h)` and `setInside(bool)` (triangle + 6 Hz tremolo) drive the voice. It fades out after 150 ms without movement.
   - One-shots: `tick(pan)`, `thunk(side)` (throttled to 300 ms), `chime()`, `sweep(from, to)`, `testSound()` (a left→right, low→high glide over 1.2 s).
   - `speak(text, rate)` cancels any current speech, picks an English voice (`en-CA` → `en-US` → `en*`), and ducks the voice to 0.1 while speaking.
   - `announce(text, { screenReader })` routes to `speak()`, or writes into an `aria-live="polite"` node when `screenReader` is true.
   - `dispose()`.
-- [ ] Export the pure `panFor(x, w)`, `freqFor(y, h)` and `wallSide(p, w, h)` and test them in `audio.test.ts`.
+- [x] Export the pure `panFor(x, w)`, `freqFor(y, h)` and `wallSide(p, w, h)` and test them in `audio.test.ts`.
 - **Verify:** `npm test` passes (0 → −1, w → +1, top → 880, bottom → 220, corners give the right wall side). A throwaway call from the dev console plays `testSound()` with no clicks at the start or end.
 
 ## A2 · Geometry (~25 min)
