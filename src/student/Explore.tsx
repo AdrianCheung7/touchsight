@@ -1,6 +1,7 @@
 // Owned by Part A from checkpoint C0 on (docs/CONTRACT.md §1).
 import { useRef } from 'react'
 import { href } from '../contract/routes.ts'
+import { animalCellCallouts } from './figureAnnotations.ts'
 import { useExplorer } from './useExplorer.ts'
 
 export default function Explore(props: { figureId: string; studentId: string; target?: string }) {
@@ -10,6 +11,9 @@ export default function Explore(props: { figureId: string; studentId: string; ta
     studentId: props.studentId,
     stageRef,
   })
+  const callout = figure?.id === 'animal-cell' && currentRegion
+    ? animalCellCallouts[currentRegion.id]
+    : undefined
 
   return (
     <main
@@ -42,23 +46,32 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                   strokeWidth="2.5"
                   vectorEffect="non-scaling-stroke"
                 />
-                <path
-                  d={`M ${currentRegion.labelAnchor[0]} ${currentRegion.labelAnchor[1]} L ${figure.width / 2} ${figure.height * 0.84}`}
-                  fill="none"
-                  stroke="#60a5fa"
-                  strokeWidth="2.5"
-                  strokeDasharray="8 5"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <circle
-                  cx={currentRegion.labelAnchor[0]}
-                  cy={currentRegion.labelAnchor[1]}
-                  r="5"
-                  fill="#60a5fa"
-                  stroke="white"
-                  strokeWidth="2"
-                  vectorEffect="non-scaling-stroke"
-                />
+                {callout?.leaders.map((d) => (
+                  <path
+                    key={d}
+                    d={d}
+                    fill="none"
+                    stroke="#60a5fa"
+                    strokeOpacity="0.85"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+                {callout && (
+                  <rect
+                    x={callout.label[0]}
+                    y={callout.label[1]}
+                    width={callout.label[2]}
+                    height={callout.label[3]}
+                    rx="4"
+                    fill="#60a5fa"
+                    fillOpacity="0.12"
+                    stroke="#60a5fa"
+                    strokeWidth="2"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                )}
               </>
             )}
             {(phase === 'exploring' || phase === 'paused') && (
@@ -99,14 +112,6 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             </a>
           </div>
         </section>
-      )}
-
-      {figure && currentRegion && (phase === 'exploring' || phase === 'paused') && (
-        <p className="pointer-events-none absolute bottom-[12%] left-1/2 z-10 max-w-[80vw] -translate-x-1/2 text-center font-serif text-4xl md:text-6xl">
-          <span className="inline-block border border-[#60a5fa] bg-stage px-3 py-1">
-            {currentRegion.label}
-          </span>
-        </p>
       )}
 
       {figure && (phase === 'idle' || phase === 'paused') && (

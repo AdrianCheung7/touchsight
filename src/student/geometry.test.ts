@@ -34,6 +34,8 @@ describe('area', () => {
 describe('hitTest', () => {
   const nucleus = region('nucleus', [[0, 0], [100, 0], [100, 100], [0, 100]])
   const nucleolus = region('nucleolus', [[40, 40], [60, 40], [60, 60], [40, 60]])
+  const cytoplasm = region('cytoplasm', [[0, 0], [100, 0], [100, 100], [0, 100]])
+  const microtubule = region('microtubule', [[50, 0], [54, 0], [54, 100], [50, 100]])
 
   it('returns the smallest region when polygons are nested', () => {
     expect(hitTest([nucleus, nucleolus], [50, 50])).toBe(nucleolus)
@@ -41,6 +43,18 @@ describe('hitTest', () => {
 
   it('returns null on the background', () => {
     expect(hitTest([nucleus, nucleolus], [150, 150])).toBeNull()
+  })
+
+  it('widens thin cell filaments so they can be found without exact tracing', () => {
+    expect(hitTest([cytoplasm, microtubule], [60, 50], null, 'animal-cell')).toBe(microtubule)
+  })
+
+  it('keeps a thin filament selected briefly after crossing its edge', () => {
+    expect(hitTest([cytoplasm, microtubule], [68, 50], microtubule, 'animal-cell')).toBe(microtubule)
+  })
+
+  it('keeps the filament buffer scoped to the Animal cell figure', () => {
+    expect(hitTest([cytoplasm, microtubule], [60, 50])).toBe(cytoplasm)
   })
 })
 

@@ -132,35 +132,7 @@ export function setInside(value: boolean) {
 }
 
 export function tick(pan: number) {
-  const context = ensureAudio()
-  if (!context || !master) return
-  const length = Math.ceil(context.sampleRate * 0.004)
-  const buffer = context.createBuffer(1, length, context.sampleRate)
-  const samples = buffer.getChannelData(0)
-  for (let i = 0; i < length; i++) samples[i] = Math.random() * 2 - 1
-
-  const source = context.createBufferSource()
-  const filter = context.createBiquadFilter()
-  const envelope = context.createGain()
-  const panner = context.createStereoPanner()
-  const now = context.currentTime
-  source.buffer = buffer
-  filter.type = 'bandpass'
-  filter.frequency.value = 3000
-  envelope.gain.setValueAtTime(0.0001, now)
-  envelope.gain.exponentialRampToValueAtTime(0.5, now + 0.001)
-  envelope.gain.exponentialRampToValueAtTime(0.0001, now + 0.004)
-  panner.pan.value = Math.max(-1, Math.min(1, pan))
-  source.connect(filter).connect(envelope)
-  source.onended = () => {
-    source.disconnect()
-    filter.disconnect()
-    envelope.disconnect()
-    panner.disconnect()
-  }
-  envelope.connect(panner).connect(master)
-  source.start()
-  source.stop(now + 0.004)
+  tone(440, pan, 0.08, { type: 'sine', gain: 0.16 })
 }
 
 let lastThunkAt = -Infinity

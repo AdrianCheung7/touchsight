@@ -116,7 +116,7 @@ export function useExplorer({
         const centre: Point = [currentFigure.width / 2, currentFigure.height / 2]
         cursorRef.current = centre
         setCursor(centre)
-        const region = hitTest(currentFigure.regions, centre)
+        const region = hitTest(currentFigure.regions, centre, regionRef.current, currentFigure.id)
         regionRef.current = region
         setCurrentRegion(region)
         setInside(Boolean(region))
@@ -152,7 +152,7 @@ export function useExplorer({
       if (result.hitWall) thunk(result.hitWall)
       else if (!prefsRef.current.quiet) setPosition(result.p[0], result.p[1], currentFigure.width, currentFigure.height)
 
-      const region = hitTest(currentFigure.regions, result.p)
+      const region = hitTest(currentFigure.regions, result.p, regionRef.current, currentFigure.id)
       if (region?.id !== regionRef.current?.id) {
         regionRef.current = region
         setCurrentRegion(region)

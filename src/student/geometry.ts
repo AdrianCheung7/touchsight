@@ -31,7 +31,29 @@ export function area(polygon: Point[]) {
   return Math.abs(twiceArea) / 2
 }
 
-export function hitTest(regions: Region[], p: Point): Region | null {
+const thinRegionIds = new Set(['microtubule', 'microfilament', 'intermediate-filament'])
+// ponytail: these image-pixel buffers are tuned for Animal cell; calibrate before using on other figures.
+const thinRegionHitSlop = 12
+const thinRegionExitSlop = 16
+
+function distanceToSegment(p: Point, a: Point, b: Point) {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const lengthSquared = dx * dx + dy * dy
+  const t = lengthSquared ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / lengthSquared)) : 0
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy)
+}
+
+function distanceToPolygon(p: Point, polygon: Point[]) {
+  if (pointInPolygon(p, polygon)) return 0
+  let distance = Infinity
+  for (let i = 0; i < polygon.length; i++) {
+    distance = Math.min(distance, distanceToSegment(p, polygon[i], polygon[(i + 1) % polygon.length]))
+  }
+  return distance
+}
+
+export function hitTest(regions: Region[], p: Point, previous?: Region | null, figureId?: string): Region | null {
   let hit: Region | null = null
   let smallestArea = Infinity
   for (const region of regions) {
@@ -42,6 +64,22 @@ export function hitTest(regions: Region[], p: Point): Region | null {
       smallestArea = regionArea
     }
   }
+
+  if (figureId !== 'animal-cell') return hit
+
+  if (previous && thinRegionIds.has(previous.id) && distanceToPolygon(p, previous.polygon) <= thinRegionExitSlop) return previous
+
+  let nearestThin: Region | null = null
+  let nearestDistance = thinRegionHitSlop
+  for (const region of regions) {
+    if (!thinRegionIds.has(region.id)) continue
+    const distance = distanceToPolygon(p, region.polygon)
+    if (distance < nearestDistance) {
+      nearestThin = region
+      nearestDistance = distance
+    }
+  }
+  if (nearestThin) return nearestThin
   return hit
 }
 
