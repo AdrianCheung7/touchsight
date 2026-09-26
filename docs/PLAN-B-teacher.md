@@ -144,23 +144,23 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
 - [x] `saveFigure` a new `upload-<timestamp>` figure with zero regions, then open the editor. The empty state reads: *"Trace each part the student should find. Click around its edge; press Enter to close."*
 - **Verify:** upload `canada.png` as a new figure, trace two provinces, use **Write all missing**, Preview, and hear them. It survives a reload; a PDF is rejected. **Merge to `main`: this is C2.**
 
-## B6 · Braille + swell-paper export (~40 min)
+## B6 · Braille + swell-paper export (~40 min) ✅
 
-- [ ] `braille.ts` + test:
+- [x] `braille.ts` + test:
   - UEB Grade 1: letters a–z, the capital indicator (dot 6), and the number sign (dots 3456) with digits a–j.
   - `cellsFor(text)` returns an array of dot sets.
   - `drawCells(x, y, cells)` returns SVG circles: dot Ø 1.5 mm, dot pitch 2.5 mm, cell pitch 6.0 mm.
-- [ ] `exportSvg.ts`, per SPEC F5: US Letter in mm, 15 mm margins, 0.8 mm outlines with no fill and no raster image. The braille title sits on top, and there's a print caption. When a label doesn't fit its region, use a key number, and add a key page listing each number and its label.
-- [ ] Show a QR code for the explorer link (`qrcode`, data URL) in the export dialog.
+- [x] `exportSvg.ts`, per SPEC F5: US Letter in mm, 15 mm margins, 0.8 mm outlines with no fill and no raster image. The braille title sits on top, and there's a print caption. When a label doesn't fit its region, use a key number, and add a key page listing each number and its label.
+- [x] Show a QR code for the explorer link (`qrcode`, data URL) in the export dialog.
 - **Verify:** "Cell" encodes as ⠠⠉⠑⠇⠇ and "12" as ⠼⠁⠃. The SVG opens in the browser with correctly sized dots, and small regions use key numbers.
 
-## B7 · About + demo panel (~30 min)
+## B7 · About + demo panel (~30 min) ✅
 
-- [ ] `About.tsx` (`#/about`), a single screen:
+- [x] `About.tsx` (`#/about`), a single screen:
   - the pipeline as five boxes: diagram → teacher traces → figure data → sound & speech → braille;
   - three claims: $0 · offline · private;
   - credits, licenses, and the Sources list from `DEMO.md`.
-- [ ] `DemoPanel.tsx`, opened with `Ctrl+Shift+D` from anywhere. B's handler ignores the key while pointer lock is active. It's a small unlabelled-looking "Presenter" sheet with:
+- [x] `DemoPanel.tsx`, opened with `Ctrl+Shift+D` from anywhere. B's handler ignores the key while pointer lock is active. It's a small unlabelled-looking "Presenter" sheet with:
   - **Reset everything** (`resetDemo()` then reload);
   - **Open hero** (`href.explore('animal-cell', 'guest', 'mitochondrion')`);
   - **Open dashboard**;
@@ -169,17 +169,17 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   It's never linked from the UI. It's for the presenter only.
 - **Verify:** in airplane mode, reset gives a pristine dashboard, and Open hero lands on the explorer's start overlay.
 
-## B8 · Accessibility + polish on B's screens (~40 min)
+## B8 · Accessibility + polish on B's screens (~40 min) ✅ (Narrator pending)
 
-- [ ] Keyboard-only pass on Home, Student, Edit, Upload and About: visible focus, no traps, a logical order, semantic headings, labelled buttons.
-- [ ] Narrator: the dashboard reads sensibly.
-- [ ] Reduced motion and high contrast both look right.
-- [ ] Lighthouse accessibility ≥ 95 on Home and Edit.
-- [ ] Polish with `minimalist-ui`, `emil-design-eng` and `animate`: card spacing, empty and loading states, and the "AI draft" badge. Only the motion listed in `DESIGN.md`.
-- [ ] `/ponytail-review` on B's files.
+- [x] Keyboard-only pass on Home, Student, Edit, Upload and About: visible focus, no traps, a logical order, semantic headings, labelled buttons.
+- [ ] Narrator: the dashboard reads sensibly. *(needs a human with Narrator on; the accessibility tree and Lighthouse are clean)*
+- [x] Reduced motion and high contrast both look right.
+- [x] Lighthouse accessibility ≥ 95 on Home and Edit. *(100 on Home, Edit, Student, Upload and About)*
+- [x] Polish with `minimalist-ui`, `emil-design-eng` and `animate`: card spacing, empty and loading states, and the "AI draft" badge. Only the motion listed in `DESIGN.md`.
+- [x] `/ponytail-review` on B's files.
 - **Verify:** `npm test` and `npm run build` pass. **Merge to `main`: this is C3 (07:15)**, then the joint rehearsal.
 
-## B9 · Live Ollama (only after C3 is green; hard stop 07:45)
+## B9 · Live Ollama (only after C3 is green; hard stop 07:45) — ⏭ skipped by decision (AI stays on the answer table; follow the AI rule in DEMO.md)
 
 - [ ] `ollama pull qwen2.5vl:7b` (start the download early, during B1, in the background). Run `ollama serve` with `OLLAMA_ORIGINS=http://localhost:4173,http://localhost:5173`.
 - [ ] Add an `'ollama'` branch in `ai.ts`, per SPEC F7:

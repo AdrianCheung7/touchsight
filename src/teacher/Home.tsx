@@ -160,13 +160,16 @@ function Recent({ sessions, students, figures, now }: Data) {
           {recent.map((s, i) => (
             <li
               key={s.id}
-              className={`flex flex-wrap items-baseline gap-x-2 px-2 py-3 ${i === 0 && now - Date.parse(s.at) < 5 * 60_000 ? 'fresh-row' : ''}`}
+              className={`flex flex-wrap items-baseline justify-between gap-x-4 px-2 py-3 ${i === 0 && now - Date.parse(s.at) < 5 * 60_000 ? 'fresh-row' : ''}`}
             >
               <span>
                 {studentName(students, s.studentId)} found {regionLabel(figures, s.figureId, s.targetRegionId)} in{' '}
-                <span className="font-mono tabular-nums">{s.seconds} s</span>
+                <span className="font-mono tabular-nums">{s.seconds}</span> s
               </span>
-              <span className="text-muted">· {ago(s.at, now)}</span>
+              <span className="text-muted">
+                <span className="sr-only">· </span>
+                {ago(s.at, now)}
+              </span>
             </li>
           ))}
         </ol>
