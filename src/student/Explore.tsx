@@ -2,20 +2,23 @@
 import { useRef } from 'react'
 import { href } from '../contract/routes.ts'
 import { animalCellCallouts } from './figureAnnotations.ts'
+import { formatElapsed } from './findIt.ts'
 import { useExplorer } from './useExplorer.ts'
 
 export default function Explore(props: { figureId: string; studentId: string; target?: string }) {
   const stageRef = useRef<HTMLElement>(null)
   const figureAreaRef = useRef<HTMLDivElement>(null)
-  const { figure, phase, cursor, currentRegion, loadError, lockError } = useExplorer({
+  const { figure, phase, cursor, currentRegion, challenge, challengeElapsed, loadError, lockError } = useExplorer({
     figureId: props.figureId,
     studentId: props.studentId,
+    target: props.target,
     stageRef,
     figureAreaRef,
   })
   const callout = figure?.id === 'animal-cell' && currentRegion
     ? animalCellCallouts[currentRegion.id]
     : undefined
+  const challengeTarget = figure?.regions.find(({ id }) => id === challenge?.targetRegionId)
 
   return (
     <main
@@ -109,6 +112,22 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         {figure && <span className="text-white/80">{figure.title}</span>}
       </header>
 
+      {challenge && (
+        <div className="pointer-events-none absolute inset-x-0 top-12 z-40 text-center text-white" aria-live="off">
+          <p className="font-mono text-sm uppercase tracking-widest text-white/70">
+            {challenge.status === 'paused' ? 'Paused · find the' : challenge.status === 'found' ? 'Found' : 'Find the'} {challengeTarget?.label ?? challenge.targetRegionId}
+          </p>
+          <p
+            role="timer"
+            aria-live="off"
+            aria-label={`Elapsed time ${formatElapsed(challengeElapsed)}`}
+            className={`font-mono text-[clamp(3.25rem,11vw,6rem)] leading-none tabular-nums ${challenge.status === 'found' ? 'text-accent find-it-found' : ''}`}
+          >
+            {formatElapsed(challengeElapsed)}
+          </p>
+        </div>
+      )}
+
       {!figure && !loadError && (
         <p role="status" className="absolute inset-0 grid place-items-center text-white/80">
           Loading diagram…
@@ -129,7 +148,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
 
       {(phase === 'keyboard' || phase === 'exploring') && (
         <p role="status" className="absolute inset-x-4 bottom-3 z-10 mx-auto w-fit max-w-[calc(100vw-2rem)] rounded bg-black/75 px-4 py-2 text-center text-xs text-white">
-          <span className="block">{phase === 'keyboard' ? 'Arrows move · Tab parts · Space explain · W location · Q tone off · Esc pause · ? help' : 'Trackpad moves · ? controls'}</span>
+          <span className="block">{phase === 'keyboard' ? 'Arrows move · Tab parts · F find-it · Space explain · W location · Q tone off · Esc pause · ? help' : 'Trackpad moves · F find-it · ? controls'}</span>
           <span className="block">Sound: left/right stereo · low bottom, high top · soft thunk at region edges</span>
         </p>
       )}

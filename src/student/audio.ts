@@ -98,6 +98,11 @@ function tone(
   play(oscillator, envelope, panner, duration)
 }
 
+export function chime() {
+  tone(523.25, 0, 0.16, { type: 'sine', gain: 0.4, decay: true })
+  tone(783.99, 0, 0.2, { type: 'sine', gain: 0.36, decay: true })
+}
+
 export function setPosition(x: number, y: number, w: number, h: number) {
   const context = ensureAudio()
   if (!context || !positionVoice || !positionPanner) return

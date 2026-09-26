@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { dispose, freqFor, panFor, regionThunk, wallSide } from './audio.ts'
+import { chime, dispose, freqFor, panFor, regionThunk, wallSide } from './audio.ts'
 
 class Param {
   value = 0
@@ -89,5 +89,22 @@ describe('regionThunk', () => {
 
     expect(AudioContextMock.latest.gains[2].gain.ramps[0]).toBe(0.32)
     expect(AudioContextMock.latest.oscillators[1].stopTime).toBe(0.12)
+  })
+})
+
+describe('chime', () => {
+  it('plays a clear, centered two-note success cue', () => {
+    vi.stubGlobal('AudioContext', AudioContextMock)
+    vi.stubGlobal('window', {
+      AudioContext: AudioContextMock,
+      clearTimeout,
+      setTimeout,
+      speechSynthesis: { cancel() {} },
+    })
+
+    chime()
+
+    expect(AudioContextMock.latest.oscillators.slice(1).map(({ frequency }) => frequency.value)).toEqual([523.25, 783.99])
+    expect(AudioContextMock.latest.oscillators.slice(1).map(({ stopTime }) => stopTime)).toEqual([0.16, 0.2])
   })
 })

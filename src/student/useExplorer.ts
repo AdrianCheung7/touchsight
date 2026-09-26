@@ -1,8 +1,9 @@
 // Owned by Part A from checkpoint C0 on (docs/CONTRACT.md §1).
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { Figure, Point, Region, StudentPrefs } from '../contract/types.ts'
-import { getFigure, getStudent, saveStudentPrefs } from '../data/db.ts'
-import { announce as announceLive, dispose, regionThunk, setPosition, sweep, testSound, thunk } from './audio.ts'
+import { getFigure, getStudent, recordSession, saveStudentPrefs } from '../data/db.ts'
+import { announce as announceLive, chime, dispose, regionThunk, setPosition, sweep, testSound, thunk } from './audio.ts'
+import { elapsedMs as challengeElapsedMs, pauseChallenge, pickTarget, resumeChallenge, type Challenge } from './findIt.ts'
 import { adjacentRegion, clamp, hitTest, whereAmI } from './geometry.ts'
 
 type Phase = 'loading' | 'idle' | 'exploring' | 'keyboard' | 'paused'
@@ -18,11 +19,13 @@ function announce(text: string, prefs: StudentPrefs) {
 export function useExplorer({
   figureId,
   studentId,
+  target,
   stageRef,
   figureAreaRef,
 }: {
   figureId: string
   studentId: string
+  target?: string
   stageRef: RefObject<HTMLElement | null>
   figureAreaRef: RefObject<HTMLDivElement | null>
 }) {
@@ -30,6 +33,8 @@ export function useExplorer({
   const [phase, setPhase] = useState<Phase>('loading')
   const [cursor, setCursor] = useState<Point>([0, 0])
   const [currentRegion, setCurrentRegion] = useState<Region | null>(null)
+  const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [challengeElapsed, setChallengeElapsed] = useState(0)
   const [loadError, setLoadError] = useState('')
   const [lockError, setLockError] = useState('')
   const figureRef = useRef<Figure | null>(null)
@@ -39,9 +44,11 @@ export function useExplorer({
   const phaseRef = useRef<Phase>('loading')
   const lockPending = useRef(false)
   const started = useRef(false)
+  const challengeRef = useRef<Challenge | null>(null)
 
   useEffect(() => {
     let active = true
+    let challengeInterval: number | undefined
     const stageElement = stageRef.current
     figureRef.current = null
     phaseRef.current = 'loading'
@@ -61,13 +68,16 @@ export function useExplorer({
       cursorRef.current = centre
       regionRef.current = null
       started.current = false
+      challengeRef.current = null
+      setChallenge(null)
+      setChallengeElapsed(0)
       phaseRef.current = 'idle'
       setFigure(loadedFigure)
       setCursor(centre)
       setCurrentRegion(null)
       setPhase('idle')
       announce(
-        `${loadedFigure.title}. ${loadedFigure.regions.length} parts. Press Enter to start. Left and right pan the sound; low pitch is at the bottom and high pitch is at the top. A soft thunk marks region edges. Tab selects the next part; Shift+Tab selects the previous. Press question mark for help.`,
+        `${loadedFigure.title}. ${loadedFigure.regions.length} parts. Press Enter to start. Left and right pan the sound; low pitch is at the bottom and high pitch is at the top. A soft thunk marks region edges. Press F to start a find-it challenge. Tab selects the next part; Shift+Tab selects the previous. Press question mark for help.`,
         prefs,
       )
     }).catch((error: unknown) => {
@@ -75,10 +85,79 @@ export function useExplorer({
       setLoadError(error instanceof Error ? error.message : 'This diagram could not be loaded.')
     })
 
+    const stopChallengeClock = () => {
+      if (challengeInterval !== undefined) window.clearInterval(challengeInterval)
+      challengeInterval = undefined
+    }
+
+    const startChallengeClock = () => {
+      stopChallengeClock()
+      challengeInterval = window.setInterval(() => {
+        const current = challengeRef.current
+        if (current?.status === 'active') setChallengeElapsed(challengeElapsedMs(current, performance.now()))
+      }, 1_000)
+    }
+
+    const pauseFindIt = (status: 'paused' | 'found' = 'paused') => {
+      const current = challengeRef.current
+      if (!current || current.status !== 'active') return null
+      stopChallengeClock()
+      const next = pauseChallenge(current, performance.now(), status)
+      challengeRef.current = next
+      setChallenge(next)
+      setChallengeElapsed(next.elapsedMs)
+      return next
+    }
+
+    const resumeFindIt = () => {
+      const current = challengeRef.current
+      if (current?.status !== 'paused') return
+      const next = resumeChallenge(current, performance.now())
+      challengeRef.current = next
+      setChallenge(next)
+      startChallengeClock()
+    }
+
+    const completeFindIt = (region: Region | null, currentFigure: Figure) => {
+      if (!region || challengeRef.current?.status !== 'active' || challengeRef.current.targetRegionId !== region.id) return
+      const found = pauseFindIt('found')
+      if (!found) return
+      chime()
+      announce(`Found in ${Math.round(found.elapsedMs / 1_000)} seconds.`, prefsRef.current)
+      void recordSession({
+        studentId,
+        figureId: currentFigure.id,
+        targetRegionId: region.id,
+        seconds: found.elapsedMs / 1_000,
+      }).catch(() => announce('Could not save the find-it time.', prefsRef.current))
+    }
+
+    const startFindIt = (currentFigure: Figure) => {
+      const targetRegion = pickTarget(currentFigure.regions, currentFigure.id, target, regionRef.current?.id ?? null)
+      if (!targetRegion) {
+        announce('This diagram has no parts to find.', prefsRef.current)
+        return
+      }
+      stopChallengeClock()
+      const next: Challenge = {
+        targetRegionId: targetRegion.id,
+        status: 'active',
+        startedAt: performance.now(),
+        elapsedMs: 0,
+      }
+      challengeRef.current = next
+      setChallenge(next)
+      setChallengeElapsed(0)
+      announce(`Find the ${targetRegion.label}.`, prefsRef.current)
+      startChallengeClock()
+      if (regionRef.current?.id === targetRegion.id) completeFindIt(regionRef.current, currentFigure)
+    }
+
     const reportLockFailure = () => {
       if (!lockPending.current) return
       lockPending.current = false
-      const message = 'Pointer control is unavailable. Keyboard mode: use arrow keys to move and Tab or Shift+Tab to choose a part. Press question mark for help.'
+      const message = 'Pointer control is unavailable. Keyboard mode: use arrow keys to move, Tab or Shift+Tab to choose a part, and F for find-it. Press question mark for help.'
+      resumeFindIt()
       phaseRef.current = 'keyboard'
       setPhase('keyboard')
       setLockError('')
@@ -90,15 +169,17 @@ export function useExplorer({
       if (document.pointerLockElement === stage && stage) {
         lockPending.current = false
         if (phaseRef.current !== 'exploring') {
+          resumeFindIt()
           phaseRef.current = 'exploring'
           setPhase('exploring')
           announce('Exploring. Press question mark for help.', prefsRef.current)
         }
       } else if (phaseRef.current === 'exploring') {
         lockPending.current = false
+        const pausedChallenge = pauseFindIt()
         phaseRef.current = 'paused'
         setPhase('paused')
-        announce('Paused. Press Enter to continue.', prefsRef.current)
+        announce(pausedChallenge ? 'Challenge paused. Press Enter to continue.' : 'Paused. Press Enter to continue.', prefsRef.current)
       }
     }
 
@@ -115,6 +196,7 @@ export function useExplorer({
         setCurrentRegion(region)
         if ((region || previousRegion) && !result.hitWall) regionThunk(result.p[0], currentFigure.width)
         if (region) announce(region.label, prefsRef.current)
+        completeFindIt(region, currentFigure)
       }
 
       if (result.hitWall) thunk(result.hitWall)
@@ -128,6 +210,7 @@ export function useExplorer({
       setCurrentRegion(region)
       if (!prefsRef.current.quiet) setPosition(region.labelAnchor[0], region.labelAnchor[1], currentFigure.width, currentFigure.height)
       announce(region.label, prefsRef.current)
+      completeFindIt(region, currentFigure)
     }
 
     const persistPrefs = (prefs: StudentPrefs) => {
@@ -176,10 +259,16 @@ export function useExplorer({
       if (!currentFigure) return
       if (event.key === '?' && currentPhase !== 'idle' && currentPhase !== 'loading') {
         event.preventDefault()
-        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
+        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. F starts a find-it challenge. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
         return
       }
       if (!active) return
+
+      if ((currentPhase === 'exploring' || currentPhase === 'keyboard') && key === 'f') {
+        event.preventDefault()
+        startFindIt(currentFigure)
+        return
+      }
 
       if ((currentPhase === 'exploring' || currentPhase === 'keyboard') && event.key === 'Tab') {
         event.preventDefault()
@@ -203,9 +292,10 @@ export function useExplorer({
 
       if (event.key === 'Escape' && currentPhase === 'keyboard') {
         event.preventDefault()
+        const pausedChallenge = pauseFindIt()
         phaseRef.current = 'paused'
         setPhase('paused')
-        announce('Paused. Press Enter to continue.', prefsRef.current)
+        announce(pausedChallenge ? 'Challenge paused. Press Enter to continue.' : 'Paused. Press Enter to continue.', prefsRef.current)
       } else if (event.code === 'Space') {
         event.preventDefault()
         if (regionRef.current?.explanation) announce(regionRef.current.explanation, prefsRef.current)
@@ -269,9 +359,10 @@ export function useExplorer({
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('pointermove', onPointerMove)
       if (stageElement && document.pointerLockElement === stageElement) document.exitPointerLock()
+      stopChallengeClock()
       dispose()
     }
-  }, [figureId, studentId, stageRef, figureAreaRef])
+  }, [figureId, studentId, target, stageRef, figureAreaRef])
 
-  return { figure, phase, cursor, currentRegion, loadError, lockError }
+  return { figure, phase, cursor, currentRegion, challenge, challengeElapsed, loadError, lockError }
 }

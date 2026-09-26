@@ -66,6 +66,15 @@ h3 {
   animation: fresh-row 1.2s ease-out;
 }
 
+@keyframes find-it-found {
+  45% {
+    transform: scale(1.14);
+  }
+}
+.find-it-found {
+  animation: find-it-found 420ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -73,5 +82,9 @@ h3 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .find-it-found {
+    animation: none;
   }
 }
