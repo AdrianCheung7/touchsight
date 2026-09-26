@@ -1,9 +1,11 @@
 // Part B. Teacher editor (#/edit/:id): trace, label and explain the parts of a diagram. Autosaves.
+import QRCode from 'qrcode'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { href } from '../contract/routes.ts'
 import type { Figure, Point, Region } from '../contract/types.ts'
 import { explainRegion } from '../data/ai.ts'
 import { getFigure, saveFigure } from '../data/db.ts'
+import { exportSvg } from './exportSvg.ts'
 import { anchorFor, area, hull, inside } from './shapes.ts'
 import { primaryBtn, secondaryBtn } from './ui.ts'
 
@@ -72,6 +74,7 @@ function Editor({ initial }: { initial: Figure }) {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [saved, setSaved] = useState(true)
   const [scale, setScale] = useState(1) // image px per screen px
+  const [exporting, setExporting] = useState(false)
   const svgRef = useRef<SVGSVGElement>(null)
   const figRef = useRef(initial)
   const h1Ref = useRef<HTMLHeadingElement>(null)
@@ -473,12 +476,59 @@ function Editor({ initial }: { initial: Figure }) {
         )}
 
         <div className="flex flex-wrap gap-2 border-t border-line pt-6">
+          <button type="button" className={secondaryBtn} onClick={() => setExporting(true)}>
+            Export swell-paper SVG
+          </button>
           <button type="button" className={secondaryBtn} onClick={download}>
             Download JSON
           </button>
         </div>
+        {exporting && <ExportDialog fig={fig} onClose={() => setExporting(false)} />}
       </aside>
     </main>
+  )
+}
+
+// Swell-paper preview + download, and a QR code that opens this diagram in the explorer.
+function ExportDialog({ fig, onClose }: { fig: Figure; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  const [{ url, keys }] = useState(() => {
+    const { svg, keys } = exportSvg(fig)
+    return { url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, keys }
+  })
+  const [qr, setQr] = useState('')
+  const link = `${location.origin}${location.pathname}${href.explore(fig.id)}`
+
+  useEffect(() => {
+    ref.current?.showModal()
+    QRCode.toDataURL(link, { margin: 1, width: 176 }).then(setQr, () => setQr(''))
+  }, [link])
+
+  return (
+    <dialog ref={ref} onClose={onClose} aria-labelledby="export-h" className="m-auto w-[min(920px,calc(100vw-32px))] rounded-xl border border-line bg-paper p-0 text-ink backdrop:bg-ink/40">
+      <div className="grid gap-6 p-6 md:grid-cols-[1fr_220px]">
+        <div className="min-w-0">
+          <h2 id="export-h" className="text-2xl tracking-tight">
+            Swell-paper SVG
+          </h2>
+          <p className="mt-1 text-muted">
+            US Letter with a braille title.{' '}
+            {keys.length ? `${keys.length} of ${fig.regions.length} labels are too long for their part, so they get braille key numbers, listed on page 2.` : 'Every part is labelled in braille.'}
+          </p>
+          <img src={url} alt={`Tactile version of ${fig.title}`} className="mt-4 max-h-[60vh] w-full rounded-md border border-line bg-white object-contain object-top" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <a className={primaryBtn} href={url} download={`${fig.id}-swell-paper.svg`}>
+            Download SVG
+          </a>
+          {qr && <img src={qr} alt="" width={176} height={176} className="self-center rounded-md border border-line bg-white p-1" />}
+          <p className="text-muted">Scan to open this diagram in the explorer.</p>
+          <form method="dialog" className="mt-auto">
+            <button className={`${secondaryBtn} w-full`}>Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
   )
 }
 

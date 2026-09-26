@@ -144,14 +144,14 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
 - [x] `saveFigure` a new `upload-<timestamp>` figure with zero regions, then open the editor. The empty state reads: *"Trace each part the student should find. Click around its edge; press Enter to close."*
 - **Verify:** upload `canada.png` as a new figure, trace two provinces, use **Write all missing**, Preview, and hear them. It survives a reload; a PDF is rejected. **Merge to `main`: this is C2.**
 
-## B6 · Braille + swell-paper export (~40 min)
+## B6 · Braille + swell-paper export (~40 min) ✅
 
-- [ ] `braille.ts` + test:
+- [x] `braille.ts` + test:
   - UEB Grade 1: letters a–z, the capital indicator (dot 6), and the number sign (dots 3456) with digits a–j.
   - `cellsFor(text)` returns an array of dot sets.
   - `drawCells(x, y, cells)` returns SVG circles: dot Ø 1.5 mm, dot pitch 2.5 mm, cell pitch 6.0 mm.
-- [ ] `exportSvg.ts`, per SPEC F5: US Letter in mm, 15 mm margins, 0.8 mm outlines with no fill and no raster image. The braille title sits on top, and there's a print caption. When a label doesn't fit its region, use a key number, and add a key page listing each number and its label.
-- [ ] Show a QR code for the explorer link (`qrcode`, data URL) in the export dialog.
+- [x] `exportSvg.ts`, per SPEC F5: US Letter in mm, 15 mm margins, 0.8 mm outlines with no fill and no raster image. The braille title sits on top, and there's a print caption. When a label doesn't fit its region, use a key number, and add a key page listing each number and its label.
+- [x] Show a QR code for the explorer link (`qrcode`, data URL) in the export dialog.
 - **Verify:** "Cell" encodes as ⠠⠉⠑⠇⠇ and "12" as ⠼⠁⠃. The SVG opens in the browser with correctly sized dots, and small regions use key numbers.
 
 ## B7 · About + demo panel (~30 min)
