@@ -32,15 +32,34 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             viewBox={`0 0 ${figure.width} ${figure.height}`}
             preserveAspectRatio="xMidYMid meet"
           >
-            {currentRegion && (
-              <polygon
-                points={currentRegion.polygon.map(([x, y]) => `${x},${y}`).join(' ')}
-                fill="var(--color-accent)"
-                fillOpacity="0.25"
-                stroke="var(--color-accent)"
-                strokeWidth="2"
-                vectorEffect="non-scaling-stroke"
-              />
+            {currentRegion && (phase === 'exploring' || phase === 'paused') && (
+              <>
+                <polygon
+                  points={currentRegion.polygon.map(([x, y]) => `${x},${y}`).join(' ')}
+                  fill="var(--color-accent)"
+                  fillOpacity="0.25"
+                  stroke="#60a5fa"
+                  strokeWidth="2.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <path
+                  d={`M ${currentRegion.labelAnchor[0]} ${currentRegion.labelAnchor[1]} L ${figure.width / 2} ${figure.height * 0.84}`}
+                  fill="none"
+                  stroke="#60a5fa"
+                  strokeWidth="2.5"
+                  strokeDasharray="8 5"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <circle
+                  cx={currentRegion.labelAnchor[0]}
+                  cy={currentRegion.labelAnchor[1]}
+                  r="5"
+                  fill="#60a5fa"
+                  stroke="white"
+                  strokeWidth="2"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </>
             )}
             {(phase === 'exploring' || phase === 'paused') && (
               <circle
@@ -84,7 +103,9 @@ export default function Explore(props: { figureId: string; studentId: string; ta
 
       {figure && currentRegion && (phase === 'exploring' || phase === 'paused') && (
         <p className="pointer-events-none absolute bottom-[12%] left-1/2 z-10 max-w-[80vw] -translate-x-1/2 text-center font-serif text-4xl md:text-6xl">
-          {currentRegion.label}
+          <span className="inline-block border border-[#60a5fa] bg-stage px-3 py-1">
+            {currentRegion.label}
+          </span>
         </p>
       )}
 

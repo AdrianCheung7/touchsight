@@ -86,4 +86,17 @@ describe('clamp', () => {
   it('leaves an in-bounds point alone', () => {
     expect(clamp([100, 200], 400, 400)).toEqual({ p: [100, 200], hitWall: null })
   })
+
+  it.each([
+    [[0, 200], [1, 200], 'left'],
+    [[400, 200], [399, 200], 'right'],
+    [[200, 0], [200, 1], 'top'],
+    [[200, 400], [200, 399], 'bottom'],
+  ] as const)('reports the wall reached at %o', (point, previous, side) => {
+    expect(clamp([point[0], point[1]], 400, 400, [previous[0], previous[1]]).hitWall).toBe(side)
+  })
+
+  it('does not thunk again while moving along a wall', () => {
+    expect(clamp([0, 220], 400, 400, [0, 200]).hitWall).toBeNull()
+  })
 })

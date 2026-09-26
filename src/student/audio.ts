@@ -168,7 +168,7 @@ export function thunk(side: WallSide) {
   const now = performance.now()
   if (now - lastThunkAt < 300) return
   lastThunkAt = now
-  tone(70, side === 'left' ? -1 : side === 'right' ? 1 : 0, 0.12, { gain: 0.7, decay: true })
+  tone(220, side === 'left' ? -1 : side === 'right' ? 1 : 0, 0.12, { type: 'triangle', gain: 0.7, decay: true })
 }
 
 export function chime() {

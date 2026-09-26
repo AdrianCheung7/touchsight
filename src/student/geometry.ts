@@ -62,8 +62,15 @@ export function readingOrder(regions: Region[], h?: number) {
   })
 }
 
-export function clamp(p: Point, w: number, h: number): { p: Point; hitWall: WallSide | null } {
-  const hitWall = wallSide({ x: p[0], y: p[1] }, w, h)
+export function clamp(p: Point, w: number, h: number, previous?: Point): { p: Point; hitWall: WallSide | null } {
+  let hitWall = wallSide({ x: p[0], y: p[1] }, w, h)
+  if (!hitWall && previous && w > 0 && h > 0) {
+    const x: WallSide | null = p[0] <= 0 && p[0] < previous[0] ? 'left' : p[0] >= w && p[0] > previous[0] ? 'right' : null
+    const y: WallSide | null = p[1] <= 0 && p[1] < previous[1] ? 'top' : p[1] >= h && p[1] > previous[1] ? 'bottom' : null
+    hitWall = x && y
+      ? Math.abs(p[0] - previous[0]) / w >= Math.abs(p[1] - previous[1]) / h ? x : y
+      : x ?? y
+  }
   return {
     p: [Math.max(0, Math.min(w, p[0])), Math.max(0, Math.min(h, p[1]))],
     hitWall,

@@ -138,13 +138,15 @@ export function useExplorer({
       const stage = stageRef.current
       const currentFigure = figureRef.current
       if (!stage || !currentFigure || document.pointerLockElement !== stage || phaseRef.current !== 'exploring') return
+      if (!event.movementX && !event.movementY) return
       const scale = Math.min(stage.clientWidth / currentFigure.width, stage.clientHeight / currentFigure.height)
       if (!(scale > 0)) return
       const sensitivity = prefsRef.current.sensitivity
+      const previous = cursorRef.current
       const result = clamp([
-        cursorRef.current[0] + (event.movementX * sensitivity) / scale,
-        cursorRef.current[1] + (event.movementY * sensitivity) / scale,
-      ], currentFigure.width, currentFigure.height)
+        previous[0] + (event.movementX * sensitivity) / scale,
+        previous[1] + (event.movementY * sensitivity) / scale,
+      ], currentFigure.width, currentFigure.height, previous)
       cursorRef.current = result.p
       setCursor(result.p)
       if (result.hitWall) thunk(result.hitWall)
