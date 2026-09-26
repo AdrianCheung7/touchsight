@@ -259,7 +259,7 @@ function Editor({ initial }: { initial: Figure }) {
   const missingCount = fig.regions.filter((r) => !r.explanation.trim()).length
 
   return (
-    <main className="mx-auto grid max-w-[1100px] gap-8 px-6 pb-24 pt-8 lg:grid-cols-[7fr_3fr]">
+    <main className="mx-auto grid max-w-[1100px] gap-8 px-6 pb-24 pt-8 md:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="min-w-0">
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
           <h1 ref={h1Ref} tabIndex={-1} className="text-3xl tracking-tight">
