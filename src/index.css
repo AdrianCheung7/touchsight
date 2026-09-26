@@ -51,6 +51,11 @@ h3 {
   outline-offset: 2px;
 }
 
+/* Headings take focus on route change (tabindex="-1", never in the Tab order); no ring on those. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 /* Dashboard: the newest Recent activity row fades in from accent once (DESIGN.md screen map). */
 @keyframes fresh-row {
   from {

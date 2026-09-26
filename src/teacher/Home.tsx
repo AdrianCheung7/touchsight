@@ -73,10 +73,7 @@ function Library({ figures }: { figures: Figure[] }) {
             <div className="flex flex-1 flex-col gap-1 p-5">
               <h3 className="text-xl">{f.title}</h3>
               <p className="text-muted">
-                {[f.subject, f.gradeBand].filter(Boolean).join(' · ')}
-                <span aria-hidden="true"> · </span>
-                <span className="sr-only">, </span>
-                {f.regions.length === 1 ? '1 part' : `${f.regions.length} parts`}
+                {[f.subject, f.gradeBand, f.regions.length === 1 ? '1 part' : `${f.regions.length} parts`].filter(Boolean).join(' · ')}
               </p>
               <div className="mt-auto flex gap-3 pt-4">
                 <a className={primaryBtn} href={href.explore(f.id)} aria-label={`Explore ${f.title}`}>
