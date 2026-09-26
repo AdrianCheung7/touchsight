@@ -118,7 +118,7 @@ export function regionThunk(x: number, w: number) {
   const now = performance.now()
   if (now - lastRegionThunkAt < 160) return
   lastRegionThunkAt = now
-  tone(165, panFor(x, w), 0.07, { type: 'triangle', gain: 0.16, decay: true })
+  tone(165, panFor(x, w), 0.12, { type: 'triangle', gain: 0.32, decay: true })
 }
 
 let lastThunkAt = -Infinity
