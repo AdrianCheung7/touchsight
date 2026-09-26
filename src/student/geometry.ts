@@ -1,5 +1,6 @@
 import type { Point, Region } from '../contract/types.ts'
 import { wallSide, type WallSide } from './audio.ts'
+import { animalCellCallouts } from './figureAnnotations.ts'
 
 export function pointInPolygon(p: Point, polygon: Point[]) {
   let inside = false
@@ -31,10 +32,8 @@ export function area(polygon: Point[]) {
   return Math.abs(twiceArea) / 2
 }
 
-const thinRegionIds = new Set(['microtubule', 'microfilament', 'intermediate-filament'])
 // ponytail: these image-pixel buffers are tuned for Animal cell; calibrate before using on other figures.
-const thinRegionHitSlop = 12
-const thinRegionExitSlop = 16
+const hitExitBuffer = 4
 
 function distanceToSegment(p: Point, a: Point, b: Point) {
   const dx = b[0] - a[0]
@@ -57,29 +56,39 @@ export function hitTest(regions: Region[], p: Point, previous?: Region | null, f
   let hit: Region | null = null
   let smallestArea = Infinity
   for (const region of regions) {
-    if (!pointInPolygon(p, region.polygon)) continue
-    const regionArea = area(region.polygon)
-    if (regionArea < smallestArea) {
-      hit = region
-      smallestArea = regionArea
+    const extraAreas = figureId === 'animal-cell' ? animalCellCallouts[region.id]?.extraAreas ?? [] : []
+    for (const polygon of [region.polygon, ...extraAreas]) {
+      if (!pointInPolygon(p, polygon)) continue
+      const regionArea = area(polygon)
+      if (regionArea < smallestArea) {
+        hit = region
+        smallestArea = regionArea
+      }
     }
   }
 
   if (figureId !== 'animal-cell') return hit
 
-  if (previous && thinRegionIds.has(previous.id) && distanceToPolygon(p, previous.polygon) <= thinRegionExitSlop) return previous
+  const distanceToRegion = (region: Region) => {
+    const extraAreas = animalCellCallouts[region.id]?.extraAreas ?? []
+    return Math.min(...[region.polygon, ...extraAreas].map((polygon) => distanceToPolygon(p, polygon)))
+  }
 
-  let nearestThin: Region | null = null
-  let nearestDistance = thinRegionHitSlop
+  const previousSlop = previous ? animalCellCallouts[previous.id]?.hitSlop ?? 0 : 0
+  if (previous && previousSlop && distanceToRegion(previous) <= previousSlop + hitExitBuffer) return previous
+
+  let nearestBuffered: Region | null = null
+  let nearestDistance = Infinity
   for (const region of regions) {
-    if (!thinRegionIds.has(region.id)) continue
-    const distance = distanceToPolygon(p, region.polygon)
-    if (distance < nearestDistance) {
-      nearestThin = region
+    const slop = animalCellCallouts[region.id]?.hitSlop
+    if (!slop) continue
+    const distance = distanceToRegion(region)
+    if (distance <= slop && distance < nearestDistance) {
+      nearestBuffered = region
       nearestDistance = distance
     }
   }
-  if (nearestThin) return nearestThin
+  if (nearestBuffered) return nearestBuffered
   return hit
 }
 
@@ -98,6 +107,14 @@ export function readingOrder(regions: Region[], h?: number) {
     const row = Math.floor(a.labelAnchor[1] / rowHeight) - Math.floor(b.labelAnchor[1] / rowHeight)
     return row || a.labelAnchor[0] - b.labelAnchor[0]
   })
+}
+
+export function adjacentRegion(regions: Region[], currentId: string | null, direction: -1 | 1, h?: number): Region | null {
+  const ordered = readingOrder(regions, h)
+  if (!ordered.length) return null
+  const index = ordered.findIndex(({ id }) => id === currentId)
+  if (index < 0) return ordered[direction > 0 ? 0 : ordered.length - 1]
+  return ordered[(index + direction + ordered.length) % ordered.length]
 }
 
 export function clamp(p: Point, w: number, h: number, previous?: Point): { p: Point; hitWall: WallSide | null } {

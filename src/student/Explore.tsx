@@ -6,10 +6,12 @@ import { useExplorer } from './useExplorer.ts'
 
 export default function Explore(props: { figureId: string; studentId: string; target?: string }) {
   const stageRef = useRef<HTMLElement>(null)
+  const figureAreaRef = useRef<HTMLDivElement>(null)
   const { figure, phase, cursor, currentRegion, loadError, lockError } = useExplorer({
     figureId: props.figureId,
     studentId: props.studentId,
     stageRef,
+    figureAreaRef,
   })
   const callout = figure?.id === 'animal-cell' && currentRegion
     ? animalCellCallouts[currentRegion.id]
@@ -23,7 +25,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
       className="relative isolate h-dvh w-screen overflow-hidden bg-stage font-sans text-white"
     >
       {figure && (
-        <>
+        <div ref={figureAreaRef} className="pointer-events-none absolute inset-x-0 top-0 bottom-20">
           <img
             src={figure.image}
             alt=""
@@ -36,7 +38,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             viewBox={`0 0 ${figure.width} ${figure.height}`}
             preserveAspectRatio="xMidYMid meet"
           >
-            {currentRegion && (phase === 'exploring' || phase === 'paused') && (
+            {currentRegion && (phase === 'exploring' || phase === 'keyboard' || phase === 'paused') && (
               <>
                 <polygon
                   points={currentRegion.polygon.map(([x, y]) => `${x},${y}`).join(' ')}
@@ -46,6 +48,17 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                   strokeWidth="2.5"
                   vectorEffect="non-scaling-stroke"
                 />
+                {callout?.extraAreas?.map((area, index) => (
+                  <polygon
+                    key={index}
+                    points={area.map(([x, y]) => `${x},${y}`).join(' ')}
+                    fill="var(--color-accent)"
+                    fillOpacity="0.25"
+                    stroke="#60a5fa"
+                    strokeWidth="2.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
                 {callout?.leaders.map((d) => (
                   <path
                     key={d}
@@ -74,7 +87,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                 )}
               </>
             )}
-            {(phase === 'exploring' || phase === 'paused') && (
+            {(phase === 'exploring' || phase === 'keyboard' || phase === 'paused') && (
               <circle
                 cx={cursor[0]}
                 cy={cursor[1]}
@@ -86,7 +99,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
               />
             )}
           </svg>
-        </>
+        </div>
       )}
 
       <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
@@ -114,6 +127,13 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         </section>
       )}
 
+      {(phase === 'keyboard' || phase === 'exploring') && (
+        <p role="status" className="absolute inset-x-4 bottom-3 z-10 mx-auto w-fit max-w-[calc(100vw-2rem)] rounded bg-black/75 px-4 py-2 text-center text-xs text-white">
+          <span className="block">{phase === 'keyboard' ? 'Arrows move · Tab parts · Space explain · W location · Q tone off · Esc pause · ? help' : 'Trackpad moves · ? controls'}</span>
+          <span className="block">Sound: left/right stereo · low bottom, high top · soft thunk at region edges</span>
+        </p>
+      )}
+
       {figure && (phase === 'idle' || phase === 'paused') && (
         <section className="absolute inset-0 z-20 grid place-items-center px-6 text-center" aria-labelledby="explore-title">
           <div>
@@ -127,7 +147,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                 <>Press <kbd className="mx-1 rounded border border-white/30 px-2 py-1 font-mono text-base">Enter</kbd> to start exploring.</>
               )}
             </p>
-            <p className="mt-4 text-sm text-white/75">Move on the trackpad. Press ? for help.</p>
+            <p className="mt-4 text-sm text-white/75">Move on the trackpad. If it is unavailable, use arrow keys and Tab. Press ? for help.</p>
             {lockError && <p role="alert" className="mt-4 text-sm">{lockError}</p>}
           </div>
         </section>

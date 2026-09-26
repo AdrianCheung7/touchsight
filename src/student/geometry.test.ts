@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Point, Region } from '../contract/types.ts'
-import { area, clamp, hitTest, pointInPolygon, readingOrder, whereAmI } from './geometry.ts'
+import { adjacentRegion, area, clamp, hitTest, pointInPolygon, readingOrder, whereAmI } from './geometry.ts'
 
 const region = (id: string, polygon: Point[], labelAnchor: Point = [0, 0]): Region => ({
   id,
@@ -56,6 +56,13 @@ describe('hitTest', () => {
   it('keeps the filament buffer scoped to the Animal cell figure', () => {
     expect(hitTest([cytoplasm, microtubule], [60, 50])).toBe(cytoplasm)
   })
+
+  it('finds the second ribosome cluster under its shared label', () => {
+    const roughEr = region('rough-endoplasmic-reticulum', [[220, 180], [330, 180], [330, 230], [220, 230]])
+    const ribosomes = region('ribosomes', [[280, 145], [320, 145], [320, 175], [280, 175]])
+
+    expect(hitTest([roughEr, ribosomes], [260, 207], null, 'animal-cell')).toBe(ribosomes)
+  })
 })
 
 describe('whereAmI', () => {
@@ -89,6 +96,21 @@ describe('readingOrder', () => {
       'right-in-row',
       'last-row',
     ])
+  })
+})
+
+describe('adjacentRegion', () => {
+  const regions = [region('first', [], [20, 20]), region('second', [], [50, 120])]
+
+  it('cycles forward and backward, wrapping at both ends', () => {
+    expect(adjacentRegion(regions, 'first', 1, 600)).toBe(regions[1])
+    expect(adjacentRegion(regions, 'second', 1, 600)).toBe(regions[0])
+    expect(adjacentRegion(regions, 'first', -1, 600)).toBe(regions[1])
+  })
+
+  it('starts at the first or last region when there is no current selection', () => {
+    expect(adjacentRegion(regions, null, 1, 600)).toBe(regions[0])
+    expect(adjacentRegion(regions, null, -1, 600)).toBe(regions[1])
   })
 })
 

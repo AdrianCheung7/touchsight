@@ -21,13 +21,9 @@ let master: GainNode | undefined
 let positionVoice: OscillatorNode | undefined
 let voiceGain: GainNode | undefined
 let positionPanner: StereoPannerNode | undefined
-let tremolo: OscillatorNode | undefined
-let tremoloDepth: GainNode | undefined
-let inside = false
 let voiceActive = false
 let speaking = false
 let movementTimer: number | undefined
-let chimeTimer: number | undefined
 let announcementTimer: number | undefined
 let liveRegion: HTMLDivElement | undefined
 let speechSerial = 0
@@ -47,12 +43,6 @@ function ensureAudio() {
     positionVoice.connect(voiceGain).connect(positionPanner).connect(master)
     positionVoice.start()
 
-    tremolo = audio.createOscillator()
-    tremolo.frequency.value = 6
-    tremoloDepth = audio.createGain()
-    tremoloDepth.gain.value = 0
-    tremolo.connect(tremoloDepth).connect(voiceGain.gain)
-    tremolo.start()
   }
   if (audio.state === 'suspended') void audio.resume().catch(() => undefined)
   return audio
@@ -112,7 +102,7 @@ export function setPosition(x: number, y: number, w: number, h: number) {
   const context = ensureAudio()
   if (!context || !positionVoice || !positionPanner) return
   voiceActive = true
-  positionVoice.type = inside ? 'triangle' : 'sine'
+  positionVoice.type = 'sine'
   positionVoice.frequency.setTargetAtTime(freqFor(y, h), context.currentTime, 0.015)
   positionPanner.pan.setTargetAtTime(panFor(x, w), context.currentTime, 0.015)
   updateVoiceEnvelope()
@@ -123,16 +113,12 @@ export function setPosition(x: number, y: number, w: number, h: number) {
   }, 150)
 }
 
-export function setInside(value: boolean) {
-  inside = value
-  const context = ensureAudio()
-  if (!context || !positionVoice || !tremoloDepth) return
-  positionVoice.type = inside ? 'triangle' : 'sine'
-  tremoloDepth.gain.setTargetAtTime(inside ? 0.075 : 0, context.currentTime, 0.015)
-}
-
-export function tick(pan: number) {
-  tone(440, pan, 0.08, { type: 'sine', gain: 0.16 })
+let lastRegionThunkAt = -Infinity
+export function regionThunk(x: number, w: number) {
+  const now = performance.now()
+  if (now - lastRegionThunkAt < 160) return
+  lastRegionThunkAt = now
+  tone(165, panFor(x, w), 0.07, { type: 'triangle', gain: 0.16, decay: true })
 }
 
 let lastThunkAt = -Infinity
@@ -140,13 +126,7 @@ export function thunk(side: WallSide) {
   const now = performance.now()
   if (now - lastThunkAt < 300) return
   lastThunkAt = now
-  tone(220, side === 'left' ? -1 : side === 'right' ? 1 : 0, 0.12, { type: 'triangle', gain: 0.7, decay: true })
-}
-
-export function chime() {
-  tone(660, 0, 0.09, { type: 'triangle' })
-  window.clearTimeout(chimeTimer)
-  chimeTimer = window.setTimeout(() => tone(990, 0, 0.09, { type: 'triangle' }), 130)
+  tone(220, side === 'left' ? -1 : side === 'right' ? 1 : 0, 0.12, { type: 'triangle', gain: 0.28, decay: true })
 }
 
 export function sweep(from: Position, to: Position) {
@@ -230,22 +210,18 @@ export function announce(text: string, options: { screenReader?: boolean } = {})
 export function dispose() {
   if (typeof window !== 'undefined') {
     window.clearTimeout(movementTimer)
-    window.clearTimeout(chimeTimer)
     window.clearTimeout(announcementTimer)
     window.speechSynthesis?.cancel()
   }
   speechSerial++
   liveRegion?.remove()
   liveRegion = undefined
-  voiceActive = speaking = inside = false
+  voiceActive = speaking = false
   positionVoice?.stop()
   positionVoice?.disconnect()
-  tremolo?.stop()
-  tremolo?.disconnect()
-  tremoloDepth?.disconnect()
   voiceGain?.disconnect()
   positionPanner?.disconnect()
   master?.disconnect()
   if (audio) void audio.close()
-  audio = master = positionVoice = voiceGain = positionPanner = tremolo = tremoloDepth = undefined
+  audio = master = positionVoice = voiceGain = positionPanner = undefined
 }
