@@ -64,14 +64,14 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - `canada.png` ← https://upload.wikimedia.org/wikipedia/commons/1/14/Political_map_of_Canada.png
 - **Verified:** `npm test` (routes), `npm run build` and `npx oxlint src` pass. Every route renders. The stub data layer works end to end (figure, guest, session recording, `askQuestion`, `deleteFigure` rejection).
 
-## B1 · The database (~50 min)
+## B1 · The database (~50 min) ✅
 
-- [ ] `figures/animal-cell.json`: open `animal-cell.jpg` and trace **every labelled structure** (8–14 points each, tracing the structure, **not** its label text), plus `labelAnchor` and a grade-5 explanation of 30 words or fewer.
+- [x] `figures/animal-cell.json`: open `animal-cell.jpg` and trace **every labelled structure** (8–14 points each, tracing the structure, **not** its label text), plus `labelAnchor` and a grade-5 explanation of 30 words or fewer.
   - `mitochondrion` is required (it's the hero target).
   - The cytoplasm or cell membrane is the large outer region; smallest-area-wins makes the organelles hit first.
   - Metadata: `subject: "Science"`, `gradeBand: "Grade 7"`, and the `source` with credit and license.
-- [ ] `figures/canada.json`: 13 provinces and territories. Explanations give the capital plus one kid-friendly fact. PEI gets a slightly generous polygon. Metadata: `subject: "Social Studies"`, `gradeBand: "Grade 5"`, `source` = public domain.
-- [ ] `seed.ts`, the hardcoded database. **Everything is relative to `Date.now()` at load time**, so it never looks stale.
+- [x] `figures/canada.json`: 13 provinces and territories. Explanations give the capital plus one kid-friendly fact. PEI gets a slightly generous polygon. Metadata: `subject: "Social Studies"`, `gradeBand: "Grade 5"`, `source` = public domain.
+- [x] `seed.ts`, the hardcoded database. **Everything is relative to `Date.now()` at load time**, so it never looks stale.
   - `teacher: "Ms. Rivera"`.
   - Classes: "Grade 5 · Room 12" and "Grade 7 · Science".
   - 6 students, 3 per class, fictional first name plus last initial. Give 2 of them `screenReaderMode: true` and vary the sensitivity. Never use a name or detail from the pitch story.
@@ -80,38 +80,38 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
     - several targets per student;
     - times that realistically fall with practice (for example, a student's mitochondrion times go 52 → 31 → 19 s);
     - no session in the last hour, so the judge's live session is clearly the newest.
-- [ ] `db.ts`, the real implementation:
+- [x] `db.ts`, the real implementation:
   - The seed is the base. Writes go to `idb-keyval`: keys `fig:<id>`, `prefs:<studentId>`, and `sessions` (an appended array).
   - Reads merge the two: a saved figure wins, prefs override, sessions = seed + saved, sorted newest first.
   - `resetDemo()` clears the IndexedDB store.
   - Validate figures read from storage at this trust boundary: drop invalid regions with a `console.warn`.
-- [ ] `db.test.ts`, using `idb-keyval`'s `createStore` with an in-memory fallback, or by mocking the module:
+- [x] `db.test.ts`, using `idb-keyval`'s `createStore` with an in-memory fallback, or by mocking the module:
   - a saved figure overrides the seed;
   - `recordSession` then `listSessions` puts it first;
   - `resetDemo` restores the seed;
   - `getStudent('guest')` returns the default prefs.
 - **Verify:** tests pass. `#/explore/animal-cell?student=guest` loads the real cell in A's placeholder or shell.
 
-## B2 · Answers + AI module (~30 min)
+## B2 · Answers + AI module (~30 min) ✅
 
-- [ ] `answers.ts`: for every cell and Canada label (lowercased), an `explain` sentence plus 3–5 Q&A pairs keyed by intent: `what`, `why`, `where`, `size`, `fact` (Canada adds `capital`).
+- [x] `answers.ts`: for every cell and Canada label (lowercased), an `explain` sentence plus 3–5 Q&A pairs keyed by intent: `what`, `why`, `where`, `size`, `fact` (Canada adds `capital`).
   - Write them the way a patient Grade 5 teacher would speak: concrete, 1–2 sentences.
-- [ ] `ai.ts`:
+- [x] `ai.ts`:
   - `explainRegion` returns `answers[label].explain`.
   - `askQuestion` classifies the question by keywords ("what/do/does" → what, "why", "where", "big/small/size" → size, "capital", otherwise fact) and returns the matching answer.
   - For unknown labels (uploads), build a sentence from the region's own explanation. If that is empty too, answer "That part is called <label>."
   - Resolve after a random 0.9–1.8 s delay. **Never reject** (CONTRACT §5).
-  - Keep the **single switch** `const AI_BACKEND = 'local' as 'local' | 'ollama'`; B9 adds the Ollama branch behind it.
+  - ~~Keep the **single switch** `const AI_BACKEND = 'local' as 'local' | 'ollama'`~~ — omitted: B9 (live Ollama) is skipped by decision, so the answer table is the only backend.
 - **Verify:** unit test: "what does it do?" on the mitochondrion gives the `what` answer; "capital?" on BC gives Victoria; an unknown label never throws. **Merge to `main`: this is C1.** Tell Part A.
 
-## B3 · Dashboard, header, student page (~60 min)
+## B3 · Dashboard, header, student page (~60 min) ✅
 
-- [ ] `Header.tsx`: the "TouchSight" wordmark (serif), nav (Home · About), the high-contrast toggle (`data-contrast` on `<html>`, remembered in localStorage), and "Ms. Rivera" at the right.
-- [ ] `Home.tsx` (`#/`), per `DESIGN.md`:
+- [x] `Header.tsx`: the "TouchSight" wordmark (serif), nav (Home · About), the high-contrast toggle (`data-contrast` on `<html>`, remembered in localStorage), and "Ms. Rivera" at the right.
+- [x] `Home.tsx` (`#/`), per `DESIGN.md`:
   - **Library:** figure cards with thumbnail, title, subject · grade, and region count. Buttons: **Explore** (as guest), **Edit**. Plus **Upload a diagram**.
   - **Classes:** each class with its assignment ("Canada · due Thu"), and its students (name, the last activity as relative time, and a **Launch** button that opens the assigned figure as that student).
   - **Recent activity:** the last 8 sessions, e.g. "Guest found Mitochondrion in 14 s · just now". Relative times use `Intl.RelativeTimeFormat`, and the list reloads whenever the route returns to home.
-- [ ] `StudentPage.tsx` (`#/student/:id`): prefs (read-only), plus a find-time history per target as a small inline-SVG sparkline with the latest value labelled. There is no chart library.
+- [x] `StudentPage.tsx` (`#/student/:id`): prefs (read-only), plus a find-time history per target as a small inline-SVG sparkline with the latest value labelled. There is no chart library.
 - **Verify:**
   - keyboard only, the first Tab reaches "Explore Animal cell";
   - Launch opens A's explorer with the right `studentId`;
