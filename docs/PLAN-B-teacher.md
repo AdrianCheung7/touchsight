@@ -137,11 +137,11 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - edits survive a reload.
   - Run `/ponytail-review`.
 
-## B5 · Upload (~25 min)
+## B5 · Upload (~25 min) ✅
 
-- [ ] `Upload.tsx` (`#/upload`): drag-and-drop or a file picker. Accept PNG/JPG up to 10 MB; anything else gets a clear message.
-- [ ] Read the file as a data URL, get the natural size, ask for a title, subject and grade.
-- [ ] `saveFigure` a new `upload-<timestamp>` figure with zero regions, then open the editor. The empty state reads: *"Trace each part the student should find. Click around its edge; press Enter to close."*
+- [x] `Upload.tsx` (`#/upload`): drag-and-drop or a file picker. Accept PNG/JPG up to 10 MB; anything else gets a clear message.
+- [x] Read the file as a data URL, get the natural size, ask for a title, subject and grade.
+- [x] `saveFigure` a new `upload-<timestamp>` figure with zero regions, then open the editor. The empty state reads: *"Trace each part the student should find. Click around its edge; press Enter to close."*
 - **Verify:** upload `canada.png` as a new figure, trace two provinces, use **Write all missing**, Preview, and hear them. It survives a reload; a PDF is rejected. **Merge to `main`: this is C2.**
 
 ## B6 · Braille + swell-paper export (~40 min)
