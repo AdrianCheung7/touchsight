@@ -117,19 +117,19 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   - Launch opens A's explorer with the right `studentId`;
   - a session recorded in the explorer appears at the top after returning home.
 
-## B4 · Teacher editor (~75 min)
+## B4 · Teacher editor (~75 min) ✅
 
-- [ ] `Edit.tsx` (`#/edit/:id`), per SPEC F3:
+- [x] `Edit.tsx` (`#/edit/:id`), per SPEC F3:
   - image plus SVG overlay (`viewBox` = natural size);
   - select a region, drag a vertex, double-click an edge to insert a vertex, `Delete`;
   - **Draw new** (click points; `Enter` or clicking the first point closes);
-  - side panel: label, explanation, and a **✨ Write with AI** button; **Write all missing** (progress "3 of 9"), with the "AI draft — check it" badge until edited;
+  - side panel: label, explanation, and a **✨ Write with AI** button; **Write all missing** (progress "3 of 9"), with the "AI draft — check it" badge until edited; *(B9 skipped, so per the no-claims rule these read **Draft explanation** / **Draft — check it**, with no AI wording)*
   - **Merge** (convex hull, with a `ponytail:` comment);
   - undo (`Ctrl+Z`, 20 snapshots);
   - autosave through `saveFigure` (debounced 500 ms);
   - **Preview as student** → `href.explore(id)`; **Download JSON**; **Export swell-paper SVG** (B6).
-- [ ] Keyboard: a focusable region list, and arrow keys nudge the selected vertex (1 px, or 10 px with Shift).
-- [ ] **B4b:** refine the animal-cell and Canada polygons in the editor wherever they're visibly off. Then paste the downloaded JSON back over `src/data/figures/*.json` so the fixes live in the seed, and call `resetDemo()`.
+- [x] Keyboard: a focusable region list, and arrow keys nudge the selected vertex (1 px, or 10 px with Shift).
+- [x] **B4b:** *(polygons were traced from the images pixel-by-pixel by colour segmentation and checked on overlays, so the seed JSON already holds the refined shapes)* refine the animal-cell and Canada polygons in the editor wherever they're visibly off. Then paste the downloaded JSON back over `src/data/figures/*.json` so the fixes live in the seed, and call `resetDemo()`.
 - **Verify:**
   - drag, then undo, restores the vertex;
   - merge draws a hull;
