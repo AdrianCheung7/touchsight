@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { Figure, Point, Region, StudentPrefs } from '../contract/types.ts'
 import { getFigure, getStudent, saveStudentPrefs } from '../data/db.ts'
-import { announce as announceLive, dispose, regionThunk, setPosition, speak, sweep, testSound, thunk } from './audio.ts'
+import { announce as announceLive, dispose, regionThunk, setPosition, sweep, testSound, thunk } from './audio.ts'
 import { adjacentRegion, clamp, hitTest, whereAmI } from './geometry.ts'
 
 type Phase = 'loading' | 'idle' | 'exploring' | 'keyboard' | 'paused'
@@ -12,8 +12,7 @@ const SENSITIVITY = 1.0
 const KEY_STEP = 18
 
 function announce(text: string, prefs: StudentPrefs) {
-  if (prefs.screenReaderMode) announceLive(text, { screenReader: true })
-  else speak(text, prefs.speechRate)
+  announceLive(text, { screenReader: prefs.screenReaderMode, rate: prefs.speechRate })
 }
 
 export function useExplorer({
@@ -114,7 +113,7 @@ export function useExplorer({
       if (region?.id !== regionRef.current?.id) {
         regionRef.current = region
         setCurrentRegion(region)
-        if (region || previousRegion) regionThunk(result.p[0], currentFigure.width)
+        if ((region || previousRegion) && !result.hitWall) regionThunk(result.p[0], currentFigure.width)
         if (region) announce(region.label, prefsRef.current)
       }
 

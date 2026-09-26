@@ -190,8 +190,12 @@ export function speak(text: string, rate = 1.05) {
   synth.speak(utterance)
 }
 
-export function announce(text: string, options: { screenReader?: boolean } = {}) {
-  if (!options.screenReader) return speak(text)
+export function announce(text: string, options: { screenReader?: boolean; rate?: number } = {}) {
+  if (!options.screenReader) {
+    if (typeof window !== 'undefined') window.clearTimeout(announcementTimer)
+    if (liveRegion) liveRegion.textContent = ''
+    return speak(text, options.rate)
+  }
   if (typeof document === 'undefined') return
   if (!liveRegion?.isConnected) {
     liveRegion = document.createElement('div')
