@@ -26,16 +26,17 @@ export default function App() {
     if (route.page !== 'explore') document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
   }, [route])
 
+  // DemoPanel stays first on every route so it never remounts (and never misses Ctrl+Shift+D) on navigation.
   if (route.page === 'explore') {
     return (
       <>
+        <DemoPanel />
         <Explore
           key={`${route.figureId}/${route.studentId}/${route.target ?? ''}`}
           figureId={route.figureId}
           studentId={route.studentId}
           target={route.target}
         />
-        <DemoPanel />
       </>
     )
   }
