@@ -52,7 +52,7 @@ What's already there for you:
 
 ## A2 · Geometry (~25 min)
 
-- [ ] `geometry.ts`:
+- [x] `geometry.ts`:
   - `pointInPolygon` (ray casting) and `area` (shoelace);
   - `hitTest(regions, p)`: of all regions containing `p`, return the **smallest area**, or `null`;
   - `whereAmI(p, w, h)`: returns "Upper left" / "Centre" / …, using thirds;
