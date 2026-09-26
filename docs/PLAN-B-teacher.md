@@ -169,17 +169,17 @@ Begin at **B1**. When B1 replaces `db.ts`, **delete the `test-square` figure** (
   It's never linked from the UI. It's for the presenter only.
 - **Verify:** in airplane mode, reset gives a pristine dashboard, and Open hero lands on the explorer's start overlay.
 
-## B8 · Accessibility + polish on B's screens (~40 min)
+## B8 · Accessibility + polish on B's screens (~40 min) ✅ (Narrator pending)
 
-- [ ] Keyboard-only pass on Home, Student, Edit, Upload and About: visible focus, no traps, a logical order, semantic headings, labelled buttons.
-- [ ] Narrator: the dashboard reads sensibly.
-- [ ] Reduced motion and high contrast both look right.
-- [ ] Lighthouse accessibility ≥ 95 on Home and Edit.
-- [ ] Polish with `minimalist-ui`, `emil-design-eng` and `animate`: card spacing, empty and loading states, and the "AI draft" badge. Only the motion listed in `DESIGN.md`.
-- [ ] `/ponytail-review` on B's files.
+- [x] Keyboard-only pass on Home, Student, Edit, Upload and About: visible focus, no traps, a logical order, semantic headings, labelled buttons.
+- [ ] Narrator: the dashboard reads sensibly. *(needs a human with Narrator on; the accessibility tree and Lighthouse are clean)*
+- [x] Reduced motion and high contrast both look right.
+- [x] Lighthouse accessibility ≥ 95 on Home and Edit. *(100 on Home, Edit, Student, Upload and About)*
+- [x] Polish with `minimalist-ui`, `emil-design-eng` and `animate`: card spacing, empty and loading states, and the "AI draft" badge. Only the motion listed in `DESIGN.md`.
+- [x] `/ponytail-review` on B's files.
 - **Verify:** `npm test` and `npm run build` pass. **Merge to `main`: this is C3 (07:15)**, then the joint rehearsal.
 
-## B9 · Live Ollama (only after C3 is green; hard stop 07:45)
+## B9 · Live Ollama (only after C3 is green; hard stop 07:45) — ⏭ skipped by decision (AI stays on the answer table; follow the AI rule in DEMO.md)
 
 - [ ] `ollama pull qwen2.5vl:7b` (start the download early, during B1, in the background). Run `ollama serve` with `OLLAMA_ORIGINS=http://localhost:4173,http://localhost:5173`.
 - [ ] Add an `'ollama'` branch in `ai.ts`, per SPEC F7:
