@@ -78,11 +78,11 @@ One family, the system UI stack: SF Pro on Apple devices, Segoe UI Variable on W
 
 ## Layout
 
-- **Built for 1920×1080** (the demo screen). From 1536 px the rail is 320 px with a 44 px logo, the page column widens to 1600 px, and the dashboard runs three columns: Diagrams (5 parts of the width), then the two classes side by side (8 parts) so both fit on one screen, and rows grow to 128 px so the lists fill it.
+- **Built for 1920×1080** (the demo screen). From 1536 px the rail is 320 px with a 44 px logo, the page column widens to 1600 px, and the dashboard runs three columns: Diagrams (3 parts of the width), then the two classes side by side (5 parts). The demo laptop is 1920×1080 at 125% scaling, so Chrome's page is about 1536×730: the whole dashboard fits it without scrolling. Rows share the height left under the section headings (between 72 and 128 px, from the row count of the tallest column), so they fill the screen and a newly added student still fits.
 - A 244 px sticky rail and a flexible column from 1024 px; below that the rail becomes a top bar (brand plus Dashboard and About) so the editor keeps its canvas beside the part fields on small laptops.
 - A 64 px top bar titled "Teacher workspace" with today's date, and the High contrast toggle.
 - Page content capped at 1160 px (1600 px from 1536 px) with gutters `clamp(20px, 4.5vw, 84px)` (the `page` utility).
-- Dashboard: Diagrams and Students side by side from 1280 px, stacked below; no item counts. Every row (diagram, class heading, student) is one height, 80 px or 128 px from 1536 px, and both section headings are the same height, so the dividers line up across the columns. Diagrams come first in the DOM, so the first Tab lands on "Explore Animal cell".
+- Dashboard: Diagrams and Students side by side from 1280 px, stacked below; no item counts. Every row (diagram, class heading, student) is one height (80 px, screen-fitted from 1536 px), and both section headings are the same height, so the dividers line up across the columns. Diagrams come first in the DOM, so the first Tab lands on "Explore Animal cell".
 - Student page: profile heading, a three-column summary, explorer settings, the Activity trail, then find times by part.
 - Spacing steps of 8, 16 and 24 px; more space above a heading than below it.
 
@@ -100,8 +100,8 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 
 - **Buttons:** primary is `accent-strong` with white text (hover `accent-deep`), 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
 - **Rail:** the logo, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
-- **Diagram row:** thumbnail, title, subject · grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
-- **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron; a Launch button sits beside it for the class assignment. Rows are grouped by class; each class opens with a heading row: its name and "Assigned: Canada · due Tue". A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
+- **Diagram row:** thumbnail, title, grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
+- **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron (dropped from 1536 px so the status stays on one line); a Launch button sits beside it for the class assignment. Rows are grouped by class; each class opens with a heading row: its name and "Assigned: Canada · due Tue". A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
 - **Search and Add student:** on the right of the Students heading, so the rule under it lines up with the one under Diagrams. Search filters names; Add student opens a dialog (name, class) and saves to this laptop.
 - **Attempt trail:** a thin vertical line with a ring per attempt, newest first; each row shows the part, the diagram, when (relative within the hour, then "Today, 9:26 AM"), and seconds to find. About reuses it for the diagram-to-student pipeline.
 - **Tags:** 6 px, `line` border, `surface` fill, `muted` text: explorer settings, "Draft" in the editor.
