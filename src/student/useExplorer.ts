@@ -2,18 +2,18 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { Figure, Point, Region, StudentPrefs } from '../contract/types.ts'
 import { getFigure, getStudent, recordSession, saveStudentPrefs } from '../data/db.ts'
-import { announce as announceLive, chime, dispose, regionThunk, setPosition, sweep, testSound, thunk } from './audio.ts'
+import { announce as announceLive, chime, countdownClick, dispose, playSpatialCue, regionThunk, setPosition, startCue, sweep, testSound, thunk } from './audio.ts'
 import { elapsedMs as challengeElapsedMs, pauseChallenge, pickTarget, resumeChallenge, type Challenge } from './findIt.ts'
-import { adjacentRegion, clamp, hitTest, whereAmI } from './geometry.ts'
+import { adjacentRegion, centroid, clamp, hitTest, whereAmI } from './geometry.ts'
 
-type Phase = 'loading' | 'idle' | 'exploring' | 'keyboard' | 'paused'
+type Phase = 'loading' | 'idle' | 'orienting' | 'exploring' | 'keyboard' | 'paused'
 
 // ponytail: 1.0 is the default; tune on the demo laptop's trackpad.
 const SENSITIVITY = 1.0
 const KEY_STEP = 18
 
 function announce(text: string, prefs: StudentPrefs) {
-  announceLive(text, { screenReader: prefs.screenReaderMode, rate: prefs.speechRate })
+  return announceLive(text, { screenReader: prefs.screenReaderMode, rate: prefs.speechRate })
 }
 
 export function useExplorer({
@@ -49,6 +49,7 @@ export function useExplorer({
   useEffect(() => {
     let active = true
     let challengeInterval: number | undefined
+    let challengeRun = 0
     const stageElement = stageRef.current
     figureRef.current = null
     phaseRef.current = 'loading'
@@ -132,23 +133,49 @@ export function useExplorer({
       }).catch(() => announce('Could not save the find-it time.', prefsRef.current))
     }
 
-    const startFindIt = (currentFigure: Figure) => {
+    const startFindIt = async (currentFigure: Figure) => {
       const targetRegion = pickTarget(currentFigure.regions, currentFigure.id, target, regionRef.current?.id ?? null)
       if (!targetRegion) {
         announce('This diagram has no parts to find.', prefsRef.current)
         return
       }
+      const run = ++challengeRun
       stopChallengeClock()
       const next: Challenge = {
         targetRegionId: targetRegion.id,
-        status: 'active',
-        startedAt: performance.now(),
+        status: 'orienting',
+        startedAt: null,
         elapsedMs: 0,
       }
       challengeRef.current = next
       setChallenge(next)
       setChallengeElapsed(0)
-      announce(`Find the ${targetRegion.label}.`, prefsRef.current)
+      phaseRef.current = 'orienting'
+      setPhase('orienting')
+
+      await announce(`Find the ${targetRegion.label}.`, prefsRef.current)
+      if (!active || run !== challengeRun) return
+      const [x, y] = centroid(targetRegion.polygon)
+      playSpatialCue(x, y, currentFigure.width, currentFigure.height)
+      await new Promise((resolve) => window.setTimeout(resolve, 3_000))
+      if (!active || run !== challengeRun) return
+
+      for (let count = 5; count > 0; count--) {
+        const tickAt = performance.now()
+        countdownClick()
+        void announce(String(count), prefsRef.current)
+        await new Promise((resolve) => window.setTimeout(resolve, Math.max(0, 1_000 - (performance.now() - tickAt))))
+        if (!active || run !== challengeRun) return
+      }
+
+      startCue()
+      const startedAt = performance.now()
+      const startedChallenge: Challenge = { ...next, status: 'active', startedAt }
+      challengeRef.current = startedChallenge
+      setChallenge(startedChallenge)
+      const nextPhase = document.pointerLockElement === stageRef.current ? 'exploring' : 'keyboard'
+      phaseRef.current = nextPhase
+      setPhase(nextPhase)
       startChallengeClock()
       if (regionRef.current?.id === targetRegion.id) completeFindIt(regionRef.current, currentFigure)
     }
@@ -219,6 +246,11 @@ export function useExplorer({
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (phaseRef.current === 'orienting') {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) return
       const stage = stageRef.current
       const currentFigure = figureRef.current
@@ -354,6 +386,7 @@ export function useExplorer({
     document.addEventListener('pointermove', onPointerMove)
     return () => {
       active = false
+      challengeRun++
       document.removeEventListener('pointerlockchange', onPointerLockChange)
       document.removeEventListener('pointerlockerror', reportLockFailure)
       document.removeEventListener('keydown', onKeyDown)

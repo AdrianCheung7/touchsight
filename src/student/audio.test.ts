@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { chime, dispose, freqFor, panFor, regionThunk, wallSide } from './audio.ts'
+import { announce, chime, countdownClick, dispose, freqFor, panFor, playSpatialCue, regionThunk, startCue, wallSide } from './audio.ts'
 
 class Param {
   value = 0
@@ -30,10 +30,11 @@ class AudioContextMock {
   destination = new AudioNodeMock()
   gains: AudioNodeMock[] = []
   oscillators: AudioNodeMock[] = []
+  panners: AudioNodeMock[] = []
   constructor() { AudioContextMock.latest = this }
   createGain() { const node = new AudioNodeMock(); this.gains.push(node); return node }
   createOscillator() { const node = new AudioNodeMock(); this.oscillators.push(node); return node }
-  createStereoPanner() { return new AudioNodeMock() }
+  createStereoPanner() { const node = new AudioNodeMock(); this.panners.push(node); return node }
   close() { return Promise.resolve() }
 }
 
@@ -106,5 +107,72 @@ describe('chime', () => {
 
     expect(AudioContextMock.latest.oscillators.slice(1).map(({ frequency }) => frequency.value)).toEqual([523.25, 783.99])
     expect(AudioContextMock.latest.oscillators.slice(1).map(({ stopTime }) => stopTime)).toEqual([0.16, 0.2])
+  })
+})
+
+describe('orientation cues', () => {
+  it('plays a three-second tone at the target position', () => {
+    vi.stubGlobal('AudioContext', AudioContextMock)
+    vi.stubGlobal('window', {
+      AudioContext: AudioContextMock,
+      clearTimeout,
+      setTimeout,
+      speechSynthesis: { cancel() {} },
+    })
+
+    playSpatialCue(0, 0, 400, 400)
+
+    expect(AudioContextMock.latest.oscillators[1].frequency.value).toBe(880)
+    expect(AudioContextMock.latest.oscillators[1].stopTime).toBe(3)
+    expect(AudioContextMock.latest.panners[1].pan.value).toBe(-1)
+  })
+
+  it('waits for the spoken target announcement to finish', async () => {
+    class UtteranceMock {
+      onend: (() => void) | null = null
+      onerror: (() => void) | null = null
+      voice: SpeechSynthesisVoice | null = null
+      lang = ''
+      rate = 1
+      text: string
+      constructor(text: string) { this.text = text }
+    }
+    const speech: { finish: () => void } = { finish: () => undefined }
+    vi.stubGlobal('SpeechSynthesisUtterance', UtteranceMock)
+    vi.stubGlobal('AudioContext', AudioContextMock)
+    vi.stubGlobal('window', {
+      AudioContext: AudioContextMock,
+      clearTimeout,
+      setTimeout,
+      speechSynthesis: {
+        cancel() {},
+        getVoices: () => [],
+        speak: (utterance: UtteranceMock) => { speech.finish = utterance.onend ?? (() => undefined) },
+      },
+    })
+
+    let finished = false
+    const announcement = announce('Find the mitochondrion.').then(() => { finished = true })
+    await Promise.resolve()
+    expect(finished).toBe(false)
+    speech.finish()
+    await announcement
+    expect(finished).toBe(true)
+  })
+
+  it('uses a quiet short click and a distinct start cue', () => {
+    vi.stubGlobal('AudioContext', AudioContextMock)
+    vi.stubGlobal('window', {
+      AudioContext: AudioContextMock,
+      clearTimeout,
+      setTimeout,
+      speechSynthesis: { cancel() {} },
+    })
+
+    countdownClick()
+    startCue()
+
+    expect(AudioContextMock.latest.oscillators.slice(1).map(({ stopTime }) => stopTime)).toEqual([0.06, 0.24])
+    expect(AudioContextMock.latest.gains.slice(2).map(({ gain }) => gain.ramps[0])).toEqual([0.14, 0.22])
   })
 })

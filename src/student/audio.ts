@@ -103,6 +103,18 @@ export function chime() {
   tone(783.99, 0, 0.2, { type: 'sine', gain: 0.36, decay: true })
 }
 
+export function playSpatialCue(x: number, y: number, w: number, h: number) {
+  tone(freqFor(y, h), panFor(x, w), 3, { type: 'sine', gain: 0.25 })
+}
+
+export function countdownClick() {
+  tone(880, 0, 0.06, { type: 'sine', gain: 0.14, decay: true })
+}
+
+export function startCue() {
+  tone(659.25, 0, 0.24, { type: 'triangle', gain: 0.22, decay: true })
+}
+
 export function setPosition(x: number, y: number, w: number, h: number) {
   const context = ensureAudio()
   if (!context || !positionVoice || !positionPanner) return
@@ -169,9 +181,9 @@ export function testSound() {
   play(oscillator, envelope, panner, 1.2)
 }
 
-export function speak(text: string, rate = 1.05) {
+export function speak(text: string, rate = 1.05): Promise<void> {
   const synth = typeof window === 'undefined' ? undefined : window.speechSynthesis
-  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return
+  if (!synth || typeof SpeechSynthesisUtterance === 'undefined') return Promise.resolve()
   synth.cancel()
   const serial = ++speechSerial
   speaking = true
@@ -185,23 +197,27 @@ export function speak(text: string, rate = 1.05) {
   utterance.voice = voice ?? null
   utterance.lang = voice?.lang ?? 'en-CA'
   utterance.rate = rate
-  const restore = () => {
-    if (serial !== speechSerial) return
-    speaking = false
-    updateVoiceEnvelope()
-  }
-  utterance.onend = restore
-  utterance.onerror = restore
-  synth.speak(utterance)
+  return new Promise((resolve) => {
+    const restore = () => {
+      if (serial === speechSerial) {
+        speaking = false
+        updateVoiceEnvelope()
+      }
+      resolve()
+    }
+    utterance.onend = restore
+    utterance.onerror = restore
+    synth.speak(utterance)
+  })
 }
 
-export function announce(text: string, options: { screenReader?: boolean; rate?: number } = {}) {
+export function announce(text: string, options: { screenReader?: boolean; rate?: number } = {}): Promise<void> {
   if (!options.screenReader) {
     if (typeof window !== 'undefined') window.clearTimeout(announcementTimer)
     if (liveRegion) liveRegion.textContent = ''
     return speak(text, options.rate)
   }
-  if (typeof document === 'undefined') return
+  if (typeof document === 'undefined') return Promise.resolve()
   if (!liveRegion?.isConnected) {
     liveRegion = document.createElement('div')
     liveRegion.setAttribute('aria-live', 'polite')
@@ -214,6 +230,8 @@ export function announce(text: string, options: { screenReader?: boolean; rate?:
   announcementTimer = window.setTimeout(() => {
     if (liveRegion?.isConnected) liveRegion.textContent = text
   }, 0)
+  // Screen readers expose no speech-complete event; estimate a short announcement's duration.
+  return new Promise((resolve) => window.setTimeout(resolve, Math.max(900, text.trim().split(/\s+/).length * 320)))
 }
 
 export function dispose() {

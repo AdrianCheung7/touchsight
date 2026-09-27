@@ -32,6 +32,24 @@ export function area(polygon: Point[]) {
   return Math.abs(twiceArea) / 2
 }
 
+export function centroid(polygon: Point[]): Point {
+  let twiceArea = 0
+  let x = 0
+  let y = 0
+  for (let i = 0; i < polygon.length; i++) {
+    const [x1, y1] = polygon[i]
+    const [x2, y2] = polygon[(i + 1) % polygon.length]
+    const cross = x1 * y2 - x2 * y1
+    twiceArea += cross
+    x += (x1 + x2) * cross
+    y += (y1 + y2) * cross
+  }
+  if (Math.abs(twiceArea) > Number.EPSILON) return [x / (3 * twiceArea), y / (3 * twiceArea)]
+  return polygon.length
+    ? polygon.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]] as Point, [0, 0] as Point).map((value) => value / polygon.length) as Point
+    : [0, 0]
+}
+
 // ponytail: these image-pixel buffers are tuned for Animal cell; calibrate before using on other figures.
 const hitExitBuffer = 4
 

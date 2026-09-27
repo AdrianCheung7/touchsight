@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Point, Region } from '../contract/types.ts'
-import { adjacentRegion, area, clamp, hitTest, pointInPolygon, readingOrder, whereAmI } from './geometry.ts'
+import { adjacentRegion, area, centroid, clamp, hitTest, pointInPolygon, readingOrder, whereAmI } from './geometry.ts'
 
 const region = (id: string, polygon: Point[], labelAnchor: Point = [0, 0]): Region => ({
   id,
@@ -28,6 +28,17 @@ describe('area', () => {
   it('returns the same positive area for either polygon winding', () => {
     expect(area([[0, 0], [4, 0], [4, 3], [0, 3]])).toBe(12)
     expect(area([[0, 3], [4, 3], [4, 0], [0, 0]])).toBe(12)
+  })
+})
+
+describe('centroid', () => {
+  it('finds a polygon centre and handles either winding', () => {
+    expect(centroid([[0, 0], [4, 0], [4, 2], [0, 2]])).toEqual([2, 1])
+    expect(centroid([[0, 2], [4, 2], [4, 0], [0, 0]])).toEqual([2, 1])
+  })
+
+  it('falls back to the average for a degenerate polygon', () => {
+    expect(centroid([[0, 0], [4, 0], [2, 0]])).toEqual([2, 0])
   })
 })
 

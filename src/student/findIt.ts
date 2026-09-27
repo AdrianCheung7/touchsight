@@ -2,7 +2,7 @@ import type { Region } from '../contract/types.ts'
 
 export type Challenge = {
   targetRegionId: string
-  status: 'active' | 'paused' | 'found'
+  status: 'orienting' | 'active' | 'paused' | 'found'
   startedAt: number | null
   elapsedMs: number
 }

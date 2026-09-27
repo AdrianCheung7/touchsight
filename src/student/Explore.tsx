@@ -105,14 +105,14 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         </div>
       )}
 
-      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
+      <header inert={phase === 'orienting'} className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
         <a className="underline-offset-4 hover:underline" href={href.home()}>
           Back to home
         </a>
         {figure && <span className="text-white/80">{figure.title}</span>}
       </header>
 
-      {challenge && (
+      {challenge && challenge.status !== 'orienting' && (
         <div className="pointer-events-none absolute inset-x-0 top-12 z-40 text-center text-white" aria-live="off">
           <p className="font-mono text-sm uppercase tracking-widest text-white/70">
             {challenge.status === 'paused' ? 'Paused · find the' : challenge.status === 'found' ? 'Found' : 'Find the'} {challengeTarget?.label ?? challenge.targetRegionId}
@@ -145,6 +145,8 @@ export default function Explore(props: { figureId: string; studentId: string; ta
           </div>
         </section>
       )}
+
+      {phase === 'orienting' && <div aria-hidden="true" className="absolute inset-0 z-[100] cursor-none bg-black" />}
 
       {(phase === 'keyboard' || phase === 'exploring') && (
         <p role="status" className="absolute inset-x-4 bottom-3 z-10 mx-auto w-fit max-w-[calc(100vw-2rem)] rounded bg-black/75 px-4 py-2 text-center text-xs text-white">

@@ -50,6 +50,11 @@ describe('challenge timing', () => {
     expect(elapsedMs(resumed, 10_750)).toBe(2_250)
   })
 
+  it('keeps the timer stopped during target orientation', () => {
+    const orienting = { targetRegionId: 'nucleus', status: 'orienting' as const, startedAt: null, elapsedMs: 0 }
+    expect(elapsedMs(orienting, 90_000)).toBe(0)
+  })
+
   it('keeps completed elapsed time fixed', () => {
     const found = pauseChallenge(
       { targetRegionId: 'nucleus', status: 'active' as const, startedAt: 500, elapsedMs: 0 },
