@@ -27,6 +27,12 @@ function announce(text: string, prefs: StudentPrefs) {
   return announceLive(text, { screenReader: prefs.screenReaderMode, rate: prefs.speechRate })
 }
 
+export function releasePointerLock(element: HTMLElement | null) {
+  if (!element || document.pointerLockElement !== element) return false
+  document.exitPointerLock()
+  return true
+}
+
 export function useExplorer({
   figureId,
   studentId,
@@ -156,7 +162,7 @@ export function useExplorer({
       questionController?.abort()
       questionController = undefined
       finishSpeechRef.current = () => {}
-      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+      releasePointerLock(stageElement)
       setQuestion(null)
       const nextPhase = pause ? 'paused' : questionReturnPhase
       phaseRef.current = nextPhase
@@ -174,7 +180,7 @@ export function useExplorer({
       const questionText = value.trim()
       if (!questionText) return
       setQuestion({ status: 'thinking', question: questionText })
-      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+      releasePointerLock(stageElement)
       await announce('Thinking…', prefsRef.current)
       if (!active || run !== questionRun) return
       const answer = await askQuestion(currentFigure, region, questionText)
@@ -190,14 +196,14 @@ export function useExplorer({
       questionController = undefined
       finishSpeechRef.current = () => {}
       setQuestion({ status: 'input', value: '', ...(error ? { error } : {}) })
-      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+      releasePointerLock(stageElement)
     }
 
     const startQuestion = (currentFigure: Figure) => {
       const run = ++questionRun
       questionFigure = currentFigure
       questionRegion = regionRef.current
-      questionReturnPhase = document.pointerLockElement === stageElement ? 'paused' : 'keyboard'
+      questionReturnPhase = releasePointerLock(stageElement) ? 'paused' : 'keyboard'
       pauseFindIt()
       phaseRef.current = 'asking'
       setPhase('asking')
