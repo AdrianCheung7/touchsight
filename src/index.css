@@ -49,12 +49,16 @@
   --color-stage: #000000;
 }
 
-/* The page column: capped at 1160 px, with gutters that grow from 20 to 84 px (the top bar matches). */
+/* The page column: capped at 1160 px (1600 px on 1536 px+ screens, built for 1920×1080), with gutters that grow
+   from 20 to 84 px (the top bar matches). */
 @utility page {
   width: 100%;
   max-width: 72.5rem;
   margin-inline: auto;
   padding-inline: clamp(1.25rem, 4.5vw, 5.25rem);
+  @media (width >= 96rem) {
+    max-width: 100rem;
+  }
 }
 
 /* Base styles sit in the base layer, so a Tailwind utility on an element always wins. */

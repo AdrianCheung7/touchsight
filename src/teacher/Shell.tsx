@@ -1,5 +1,5 @@
 // Part B. The teacher workspace frame (DESIGN.md): the navy rail with the logo, classes and navigation,
-// and a top bar with the date and the high-contrast toggle. Plus the small drawn marks every screen shares.
+// and a top bar naming the workspace, with the date and the high-contrast toggle. Plus the small drawn marks every screen shares.
 import { useState } from 'react'
 import { href, type Route } from '../contract/routes.ts'
 import { TEACHER, classes } from '../data/seed.ts'
@@ -11,7 +11,7 @@ const TODAY = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', da
 
 export default function Shell({ page, children }: { page: Route['page']; children: React.ReactNode }) {
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[15.25rem_minmax(0,1fr)]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[15.25rem_minmax(0,1fr)] 2xl:grid-cols-[20rem_minmax(0,1fr)]">
       <Rail page={page} />
       <div className="min-w-0">
         <Topbar />
@@ -27,26 +27,25 @@ function Rail({ page }: { page: Route['page'] }) {
       <a
         href={to}
         aria-current={current ? 'page' : undefined}
-        className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-[15px] font-medium focus-visible:outline-rail-mark lg:min-h-11 ${current ? 'bg-rail-active text-white' : 'text-rail-ink/85 hover:bg-rail-active/70 hover:text-white'}`}
+        className={`flex min-h-10 items-center gap-3 rounded-lg px-3 text-[15px] font-medium focus-visible:outline-rail-mark lg:min-h-11 2xl:min-h-12 2xl:text-base ${current ? 'bg-rail-active text-white' : 'text-rail-ink/85 hover:bg-rail-active/70 hover:text-white'}`}
       >
         <span aria-hidden="true" className={`size-[7px] shrink-0 rounded-[2px] ${current ? 'bg-rail-mark' : 'bg-transparent'}`} />
         {label}
       </a>
     </li>
   )
-  const railLabel = 'mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-rail-muted'
+  const railLabel = 'mb-2 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-rail-muted 2xl:text-xs'
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-rail px-5 py-4 text-rail-ink lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:overflow-y-auto lg:px-[18px] lg:pb-5 lg:pt-7">
-      <a href={href.home()} className="flex flex-col gap-1.5 rounded-lg px-1.5 py-1 focus-visible:outline-rail-mark">
-        <img src="/logo.png" alt="TouchSight" width={608} height={111} className="h-7 w-auto lg:h-[34px]" />
-        <span className="hidden pl-0.5 text-[13px] text-rail-muted lg:block">Teacher workspace</span>
+    <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-rail px-5 py-4 text-rail-ink lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:overflow-y-auto lg:px-[18px] lg:pb-5 lg:pt-7 2xl:px-7 2xl:pt-10">
+      <a href={href.home()} className="rounded-lg px-1.5 py-1 focus-visible:outline-rail-mark">
+        <img src="/logo.png" alt="TouchSight" width={608} height={111} className="h-7 w-auto lg:h-[34px] 2xl:h-11" />
       </a>
 
       <div className="hidden lg:mt-11 lg:mb-9 lg:block">
         <p className={railLabel}>Teacher</p>
-        <p className="px-3 font-semibold text-white">{TEACHER}</p>
-        <ul className="mt-1.5 px-3 text-[13px] leading-6 text-rail-muted">
+        <p className="px-3 font-semibold text-white 2xl:text-lg">{TEACHER}</p>
+        <ul className="mt-1.5 px-3 text-[13px] leading-6 text-rail-muted 2xl:text-sm 2xl:leading-7">
           {classes.map((c) => (
             <li key={c.id}>{c.name}</li>
           ))}
@@ -61,7 +60,7 @@ function Rail({ page }: { page: Route['page'] }) {
         </ul>
       </nav>
 
-      <p className="mt-auto hidden items-center gap-2.5 px-3 pt-4 text-[13px] leading-snug text-rail-muted lg:flex">
+      <p className="mt-auto hidden items-center gap-2.5 px-3 pt-4 text-[13px] leading-snug text-rail-muted lg:flex 2xl:text-sm">
         <span aria-hidden="true" className="size-[7px] shrink-0 rounded-full bg-rail-mark" />
         Works offline. Everything stays on this laptop.
       </p>
@@ -86,8 +85,10 @@ function Topbar() {
 
   return (
     <div className="flex h-16 items-center justify-between gap-4 border-b border-line bg-surface/85 px-[clamp(1.25rem,4.5vw,5.25rem)]">
-      <p className="flex items-center gap-2.5 text-sm font-medium text-muted">
+      <p className="flex items-center gap-2.5 text-sm font-medium text-muted 2xl:text-base">
         <span aria-hidden="true" className="size-[9px] rotate-45 rounded-[3px] border-2 border-accent/70" />
+        <span className="font-semibold text-ink">Teacher workspace</span>
+        <span aria-hidden="true">·</span>
         {TODAY.format(new Date())}
       </p>
       <button

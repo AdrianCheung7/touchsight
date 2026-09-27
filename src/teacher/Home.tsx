@@ -44,7 +44,7 @@ export default function Home() {
       </h1>
       <p className="mt-2 text-muted">Prepare a diagram, then open a student to follow their find-it progress.</p>
       {data && (
-        <div className="mt-10 grid gap-x-14 gap-y-14 xl:grid-cols-2">
+        <div className="mt-10 grid gap-x-14 gap-y-14 xl:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <Library figures={data.figures} />
           <Roster data={data} onAdded={() => setVersion((v) => v + 1)} />
         </div>
@@ -53,16 +53,13 @@ export default function Home() {
   )
 }
 
-function SectionHead({ id, title, note, count }: { id: string; title: string; note: string; count: string }) {
+function SectionHead({ id, title, note }: { id: string; title: string; note: string }) {
   return (
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
-      <div>
-        <h2 id={id} className="text-xl">
-          {title}
-        </h2>
-        <p className="mt-1 text-sm text-muted">{note}</p>
-      </div>
-      <span className="text-sm text-muted tabular-nums">{count}</span>
+    <div className="mb-4">
+      <h2 id={id} className="text-xl">
+        {title}
+      </h2>
+      <p className="mt-1 text-sm text-muted">{note}</p>
     </div>
   )
 }
@@ -70,7 +67,7 @@ function SectionHead({ id, title, note, count }: { id: string; title: string; no
 function Library({ figures }: { figures: Figure[] }) {
   return (
     <section aria-labelledby="h-diagrams">
-      <SectionHead id="h-diagrams" title="Diagrams" note="Explore one as a student would, or edit its parts." count={`${figures.length} diagrams`} />
+      <SectionHead id="h-diagrams" title="Diagrams" note="Explore one as a student would, or edit its parts." />
       <ul className="border-t border-line">
         {figures.map((f) => (
           <li key={f.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-line py-4">
@@ -128,15 +125,10 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
 
   return (
     <section aria-labelledby="h-students">
-      <SectionHead
-        id="h-students"
-        title="Students"
-        note="Open a student to see their attempts and settings."
-        count={query ? `${shown.length} of ${students.length} students` : `${students.length} students`}
-      />
+      <SectionHead id="h-students" title="Students" note="Open a student to see their attempts and settings." />
 
       <div className="flex flex-wrap items-center gap-3 border-b border-line pb-4">
-        <label className="flex min-h-10.5 min-w-52 flex-1 items-center gap-2.5 rounded-lg border border-field bg-surface px-3 has-[input:focus-visible]:border-accent has-[input:focus-visible]:outline-3 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus">
+        <label className="flex min-h-10.5 min-w-52 max-w-md flex-1 items-center gap-2.5 rounded-lg border border-field bg-surface px-3 has-[input:focus-visible]:border-accent has-[input:focus-visible]:outline-3 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus">
           <Icon name="search" className="text-muted" />
           <span className="sr-only">Find a student</span>
           <input
@@ -158,25 +150,28 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
         </button>
       </div>
 
-      {classes.map((c) => {
-        const list = shown.filter((s) => s.classId === c.id)
-        if (list.length === 0) return null
-        const a = assignments.find((x) => x.classId === c.id)
-        const fig = a && figures.find((f) => f.id === a.figureId)
-        return (
-          <Group key={c.id} id={`h-class-${c.id}`} title={c.name} aside={a && fig && <span className={tag}>{fig.title} · due {weekday(a.due)}</span>}>
-            {list.map((s) => (
-              <Row key={s.id} student={s} last={lastOf(s.id)} now={now}>
-                {a && fig && (
-                  <a className={`${secondaryBtn} min-h-9 px-3 text-sm`} href={href.explore(a.figureId, s.id)} aria-label={`Launch ${fig.title} as ${s.name}`}>
-                    Launch
-                  </a>
-                )}
-              </Row>
-            ))}
-          </Group>
-        )
-      })}
+      {/* From 1536 px the two classes sit side by side, so both fit on one screen. */}
+      <div className="2xl:grid 2xl:grid-cols-2 2xl:gap-x-10">
+        {classes.map((c) => {
+          const list = shown.filter((s) => s.classId === c.id)
+          if (list.length === 0) return null
+          const a = assignments.find((x) => x.classId === c.id)
+          const fig = a && figures.find((f) => f.id === a.figureId)
+          return (
+            <Group key={c.id} id={`h-class-${c.id}`} title={c.name} aside={a && fig && <span className={tag}>{fig.title} · due {weekday(a.due)}</span>}>
+              {list.map((s) => (
+                <Row key={s.id} student={s} last={lastOf(s.id)} now={now}>
+                  {a && fig && (
+                    <a className={`${secondaryBtn} min-h-9 px-3 text-sm`} href={href.explore(a.figureId, s.id)} aria-label={`Launch ${fig.title} as ${s.name}`}>
+                      Launch
+                    </a>
+                  )}
+                </Row>
+              ))}
+            </Group>
+          )
+        })}
+      </div>
 
       {shown.length === 0 && (
         <div className="px-5 py-12 text-center">

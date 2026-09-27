@@ -262,7 +262,7 @@ function Editor({ initial }: { initial: Figure }) {
   const missingCount = fig.regions.filter((r) => !r.explanation.trim()).length
 
   return (
-    <main className="page grid gap-8 pb-20 pt-8 md:grid-cols-[minmax(0,1fr)_18rem]">
+    <main className="page grid gap-8 pb-20 pt-8 md:grid-cols-[minmax(0,1fr)_18rem] 2xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0">
         <a href={href.home()} className={`${backLink} mb-4`}>
           <Icon name="back" />
@@ -277,7 +277,11 @@ function Editor({ initial }: { initial: Figure }) {
         <p className="mb-4 min-h-6 text-muted">
           {drawing ? (fig.regions.length === 0 ? EMPTY_HINT : DRAW_HINT) : 'Select a part to edit it. Drag its points; double-click an edge to add one. Shift-click to select several.'}
         </p>
-        <div className="relative overflow-hidden rounded-lg border border-line bg-white" style={{ aspectRatio: `${fig.width} / ${fig.height}` }}>
+        {/* Never taller than the screen: on wide screens the diagram stays whole in view while you trace. */}
+        <div
+          className="relative mx-auto overflow-hidden rounded-lg border border-line bg-white"
+          style={{ aspectRatio: `${fig.width} / ${fig.height}`, maxWidth: `max(20rem, calc((100dvh - 15rem) * ${fig.width} / ${fig.height}))` }}
+        >
           <svg
             ref={svgRef}
             viewBox={`0 0 ${fig.width} ${fig.height}`}

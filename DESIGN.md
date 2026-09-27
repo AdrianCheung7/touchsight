@@ -78,10 +78,11 @@ One family, the system UI stack: SF Pro on Apple devices, Segoe UI Variable on W
 
 ## Layout
 
+- **Built for 1920×1080** (the demo screen). From 1536 px the rail is 320 px with a 44 px logo, the page column widens to 1600 px, and the dashboard runs three columns: Diagrams, then the two classes side by side so both fit on one screen.
 - A 244 px sticky rail and a flexible column from 1024 px; below that the rail becomes a top bar (brand plus Dashboard and About) so the editor keeps its canvas beside the part fields on small laptops.
-- A 64 px top bar with today's date and the High contrast toggle.
-- Page content capped at 1160 px with gutters `clamp(20px, 4.5vw, 84px)` (the `page` utility).
-- Dashboard: Diagrams and Students side by side from 1280 px, stacked below. Diagrams come first in the DOM, so the first Tab lands on "Explore Animal cell".
+- A 64 px top bar titled "Teacher workspace" with today's date, and the High contrast toggle.
+- Page content capped at 1160 px (1600 px from 1536 px) with gutters `clamp(20px, 4.5vw, 84px)` (the `page` utility).
+- Dashboard: Diagrams and Students side by side from 1280 px, stacked below; no item counts. Diagrams come first in the DOM, so the first Tab lands on "Explore Animal cell".
 - Student page: profile heading, a three-column summary, explorer settings, the Activity trail, then find times by part.
 - Spacing steps of 8, 16 and 24 px; more space above a heading than below it.
 
@@ -98,10 +99,10 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 ## Components
 
 - **Buttons:** primary is `accent-strong` with white text (hover `accent-deep`), 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
-- **Rail:** the logo with "Teacher workspace" under it, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
+- **Rail:** the logo, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
 - **Diagram row:** thumbnail, title, subject · grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
 - **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron; a Launch button sits beside it for the class assignment. Rows are grouped by class, each with its assignment tag ("Canada · due Tue"). A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
-- **Search and Add student:** search filters names and updates the count; Add student opens a dialog (name, class) and saves to this laptop.
+- **Search and Add student:** search filters names; Add student opens a dialog (name, class) and saves to this laptop.
 - **Attempt trail:** a thin vertical line with a ring per attempt, newest first; each row shows the part, the diagram, when (relative within the hour, then "Today, 9:26 AM"), and seconds to find. About reuses it for the diagram-to-student pipeline.
 - **Tags:** 6 px, `line` border, `surface` fill, `muted` text: assignment, explorer settings, "Draft" in the editor.
 - **Sparklines:** 1.5 px `accent` line with a ringed latest point and the latest time labelled; a real series, one per part.
