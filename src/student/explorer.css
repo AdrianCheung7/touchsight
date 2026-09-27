@@ -1,0 +1,36 @@
+@keyframes region-highlight-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.region-highlight-enter {
+  animation: region-highlight-in 160ms ease-out both;
+}
+
+@keyframes found-timer-pop {
+  45% { transform: scale(1.08); }
+}
+
+.explorer-found-pop {
+  animation: found-timer-pop 180ms ease-out both;
+}
+
+.cursor-glow {
+  filter: drop-shadow(0 0 24px var(--color-accent));
+}
+
+@keyframes cursor-region-pulse {
+  45% { opacity: 0.72; }
+}
+
+.cursor-region-enter {
+  animation: cursor-region-pulse 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region-highlight-enter,
+  .explorer-found-pop,
+  .cursor-region-enter {
+    animation: none;
+  }
+}

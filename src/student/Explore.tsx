@@ -2,6 +2,7 @@
 import { useRef } from 'react'
 import { href } from '../contract/routes.ts'
 import { animalCellCallouts } from './figureAnnotations.ts'
+import './explorer.css'
 import { formatElapsed } from './findIt.ts'
 import { useExplorer } from './useExplorer.ts'
 
@@ -25,7 +26,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
       ref={stageRef}
       tabIndex={question ? -1 : 0}
       aria-label={figure ? `${figure.title} explorer` : 'Diagram explorer'}
-      className={`relative isolate h-dvh w-screen overflow-hidden bg-stage font-sans text-white ${question?.status === 'thinking' ? 'question-thinking' : ''}`}
+      className="relative isolate h-dvh w-screen overflow-hidden bg-stage font-sans text-white"
     >
       {figure && (
         <div ref={figureAreaRef} inert={question !== null} className="pointer-events-none absolute inset-x-0 top-0 bottom-20">
@@ -42,7 +43,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             preserveAspectRatio="xMidYMid meet"
           >
             {currentRegion && (phase === 'exploring' || phase === 'keyboard' || phase === 'paused') && (
-              <>
+              <g key={`region-${currentRegion.id}`} className="region-highlight-enter">
                 <polygon
                   points={currentRegion.polygon.map(([x, y]) => `${x},${y}`).join(' ')}
                   fill="var(--color-accent)"
@@ -88,17 +89,18 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                     vectorEffect="non-scaling-stroke"
                   />
                 )}
-              </>
+              </g>
             )}
             {(phase === 'exploring' || phase === 'keyboard' || phase === 'paused') && (
               <circle
+                key={`cursor-${currentRegion?.id ?? 'background'}`}
                 cx={cursor[0]}
                 cy={cursor[1]}
                 r="6"
                 fill="var(--color-accent)"
                 stroke="white"
                 strokeWidth="2"
-                style={{ filter: 'drop-shadow(0 0 24px var(--color-accent))' }}
+                className={currentRegion ? 'cursor-glow cursor-region-enter' : 'cursor-glow'}
               />
             )}
           </svg>
@@ -121,7 +123,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             role="timer"
             aria-live="off"
             aria-label={`Elapsed time ${formatElapsed(challengeElapsed)}`}
-            className={`font-mono text-[clamp(3.25rem,11vw,6rem)] leading-none tabular-nums ${challenge.status === 'found' ? 'text-accent find-it-found' : ''}`}
+            className={`font-mono text-[clamp(3.25rem,11vw,6rem)] leading-none tabular-nums ${challenge.status === 'found' ? 'text-accent explorer-found-pop' : ''}`}
           >
             {formatElapsed(challengeElapsed)}
           </p>
@@ -166,19 +168,22 @@ export default function Explore(props: { figureId: string; studentId: string; ta
       )}
 
       {figure && (phase === 'idle' || phase === 'paused') && (
-        <section className="absolute inset-0 z-20 grid place-items-center px-6 text-center" aria-labelledby="explore-title">
-          <div>
-            <h1 id="explore-title" className="font-serif text-5xl md:text-6xl">
+        <section className="absolute inset-0 z-20 grid place-items-center px-6 py-24 text-center" aria-labelledby="explore-title">
+          <div className="mx-auto w-full max-w-2xl rounded-xl border border-white/15 bg-stage/95 px-8 py-10 md:px-12 md:py-12">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/55">
+              {phase === 'paused' ? 'Paused' : 'Student explorer'}
+            </p>
+            <h1 id="explore-title" className="mt-4 font-serif text-4xl leading-tight tracking-tight md:text-6xl">
               {figure.title}
             </h1>
-            <p className="mt-8 text-lg">
+            <p className="mt-7 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-lg">
               {phase === 'paused' ? (
-                <>Paused. Press <kbd className="mx-1 rounded border border-white/30 px-2 py-1 font-mono text-base">Enter</kbd> to continue.</>
+                <>Press <kbd className="rounded border border-white/30 px-2.5 py-1.5 font-mono text-base">Enter</kbd> to continue.</>
               ) : (
-                <>Press <kbd className="mx-1 rounded border border-white/30 px-2 py-1 font-mono text-base">Enter</kbd> to start exploring.</>
+                <>Press <kbd className="rounded border border-white/30 px-2.5 py-1.5 font-mono text-base">Enter</kbd> to start exploring.</>
               )}
             </p>
-            <p className="mt-4 text-sm text-white/75">Move on the trackpad. If it is unavailable, use arrow keys and Tab. Press ? for help.</p>
+            <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/70">Move on the trackpad. If it is unavailable, use arrow keys and Tab. Press ? for help.</p>
             {lockError && <p role="alert" className="mt-4 text-sm">{lockError}</p>}
           </div>
         </section>

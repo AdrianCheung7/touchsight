@@ -105,25 +105,22 @@ What's already there for you:
 
 ## A5 · Find-it + session recording (~30 min)
 
-- [ ] `F` picks the target:
-  - on the first press, `props.target` if given;
-  - otherwise, on `animal-cell`, `mitochondrion`;
-  - otherwise a random region ≠ the current one.
-- [ ] Announce *"Find the <label>."* and show the big mono timer (top-centre, 96 px, tabular numbers).
-- [ ] On entering the target: `chime()`, then *"Found in <n> seconds."*; the timer turns accent and scales once. Call `recordSession({ studentId, figureId, targetRegionId, seconds })`. `F` again starts a new round.
-- [ ] `Esc` during a challenge: pause it; the timer keeps its value; `Enter` resumes.
-- **Verify:** a blindfolded teammate finds the mitochondrion. The time shows. After going back to home, Part B's dashboard lists the session (once C2 is merged). **From now on, this path must never break.**
+- [x] `F` picks `props.target` on the first round when supplied; otherwise it defaults to the mitochondrion on `animal-cell`, or a region other than the current one. Later rounds never start on the current region.
+- [x] Orientation: show the black screen with readable target text, block input, announce *"Find the <label>."*, play the three-second spatial cue, then click and speak a 5→1 countdown.
+- [x] Restore the diagram after the countdown and start the large mono timer (top-centre, 96 px, tabular numbers).
+- [x] On entering the target: `chime()`, then *"Found in <n> seconds."*; the timer turns accent and pops once. Call `recordSession({ studentId, figureId, targetRegionId, seconds })`. `F` starts another round.
+- [x] `Esc` during an active challenge pauses it; the timer keeps its value; `Enter` resumes. `Esc` during orientation cancels the round.
+- [ ] **Final human check:** find the target by sound alone on the demo laptop, then confirm it in Chrome and Edge.
+- **Verify (agent):** the full test suite and build pass; a three-run browser rehearsal completed (18 s, 32 s, 3 s), and all three sessions appeared in Recent activity. The default and explicit-target repeat cases both start a fresh search.
 
 ## A6 · Ask a question: the `A` key (~30 min)
 
-- [ ] Flow:
-  1. `A` ducks the voice, keeps pointer lock, and announces *"Ask your question."*
-  2. If `SpeechRecognition` / `webkitSpeechRecognition` exists, listen once (en-CA). On error, or when it's unavailable (offline), open a large bottom-sheet text field with focus; `Enter` submits.
-  3. Announce *"Thinking…"* with a soft accent pulse on the stage.
-  4. `await askQuestion(figure, currentRegion, question)`, then speak the answer and show it in the sheet.
-  5. `Esc` closes the sheet and returns to exploring.
-- [ ] Guard against the Pointer Lock and text-field focus fighting: exit the lock while the sheet is open, and re-lock on close with `Enter`.
-- **Verify:** inside the mitochondrion, "what does it do?" speaks a sensible answer within a few seconds. With Wi-Fi off, the typed fallback appears automatically.
+- [x] `A` opens the question sheet and lazily loads the on-device Whisper model with progress; typed input is available while it loads.
+- [x] If voice remains selected after the model loads, request the microphone once, capture one utterance, and show **Finish speaking**. Transcribe locally, send the text to `askQuestion(figure, currentRegion, question)`, and show and speak the answer.
+- [x] Model, microphone, empty-speech, and transcription failures return to typing. `Esc` cancels, stops recording, closes the sheet, and pauses exploration.
+- [x] Release pointer lock while the sheet is open; `Enter` returns to exploration.
+- [ ] **Final human check:** allow microphone access and ask one English question aloud; confirm the spoken answer. No microphone permission was granted during agent testing.
+- **Verify (agent):** full tests and build pass; browser typed fallback, answer display, and Escape pause were checked. The microphone flow remains for the final human check above.
 
 ## Checkpoint C2: merge `main`, then the joint full-loop check (CONTRACT §6)
 
@@ -136,9 +133,9 @@ What's already there for you:
 
 ## A8 · Polish (~30 min)
 
-- [ ] Use `emil-design-eng` / `animate` on the three allowed animations only (see `DESIGN.md`): the highlight fade, the found-timer pop, the enter pulse. Refine the start overlay's typography and spacing (`minimalist-ui`).
-- [ ] `/ponytail-review` on `src/student/`; remove dead code.
-- **Verify:** `npm test` and `npm run build` pass. A three-run rehearsal of the hero beat gives no glitches.
+- [x] Tune only the three explorer animations in `DESIGN.md` (highlight fade, found-timer pop, cursor glow pulse), keep each under 200 ms and disable them for reduced motion. Refine the start overlay's typography, spacing, and contrast.
+- [x] Ponytail review of `src/student/`; remove dead code and keep the implementation minimal.
+- **Verify:** `npm test` (193 tests) and `npm run build` pass. A three-run browser rehearsal of the find-it beat completed without glitches.
 
 ## Checkpoint C3 (07:15): merge `main` and run the joint rehearsal. Freeze at 08:00.
 
