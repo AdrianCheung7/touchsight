@@ -116,7 +116,7 @@ function Library({ figures }: { figures: Figure[] }) {
             </span>
             <span className="flex-1">
               <span className="block font-semibold tracking-[-0.01em] 2xl:text-lg">Upload a diagram</span>
-              <span className="block text-sm text-muted">PNG or JPG, up to 10 MB. You trace its parts next.</span>
+              <span className="block text-sm text-muted">PNG or JPG, up to 10 MB.</span>
             </span>
             <Icon name="chevron" className="mr-2 text-muted group-hover:text-accent-strong" />
           </a>
