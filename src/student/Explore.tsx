@@ -146,7 +146,17 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         </section>
       )}
 
-      {phase === 'orienting' && <div aria-hidden="true" className="absolute inset-0 z-[100] cursor-none bg-black" />}
+      {phase === 'orienting' && (
+        <div aria-hidden="true" className="absolute inset-0 z-[100] cursor-none bg-black">
+          <div className="absolute inset-x-6 top-16 text-center text-white">
+            <p className="text-xs uppercase tracking-[0.28em] text-white/55">Listen closely</p>
+            <h1 className="mt-5 font-serif text-3xl md:text-5xl">
+              Find the {challengeTarget?.label ?? challenge?.targetRegionId}
+            </h1>
+            <p className="mt-3 text-sm text-white/65">Listen for the location cue, then follow the countdown.</p>
+          </div>
+        </div>
+      )}
 
       {(phase === 'keyboard' || phase === 'exploring') && (
         <p role="status" className="absolute inset-x-4 bottom-3 z-10 mx-auto w-fit max-w-[calc(100vw-2rem)] rounded bg-black/75 px-4 py-2 text-center text-xs text-white">
