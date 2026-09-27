@@ -25,7 +25,7 @@ A teacher-owned diagram pipeline: diagram → teacher traces parts → figure da
 - Runs as a static React app from `npm run build && npm run preview` on the demo laptop (Windows 11, Chrome, often fullscreen), in airplane mode.
 - Teacher screens: dashboard (library, classes with students), student page, diagram editor, upload, swell-paper SVG export, About, and a hidden presenter panel (Ctrl+Shift+D).
 - Data: a built-in classroom (Ms. Rivera; Grade 5 · Room 12 and Grade 7 · Science; six students; two assignments; past find-it attempts) with browser storage layered on top; "Reset everything" restores it.
-- Per-student activity (find-it attempts) is viewed by opening that student's page. There is no dashboard-wide activity feed. A **Guest** row (Visitors, first in the student list) makes a visitor's live attempt one click from the dashboard.
+- Per-student activity (find-it attempts) is viewed by opening that student's page. There is no dashboard-wide activity feed, and the dashboard lists only the classes' students (no Guest row). To show an attempt live, launch the diagram as a student: it lands on that student's row ("Active just now") and page.
 - The dashboard can search students and add a student to a class; added students are saved on the laptop and cleared by "Reset everything".
 
 ## Capabilities and Constraints

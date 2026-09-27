@@ -70,7 +70,7 @@ One family, the system UI stack: SF Pro on Apple devices, Segoe UI Variable on W
 
 ## Layout
 
-- A 244 px sticky rail and a flexible column from 1024 px; below that the rail becomes a top bar (brand plus Dashboard, Upload, About) so the editor keeps its canvas beside the part fields on small laptops.
+- A 244 px sticky rail and a flexible column from 1024 px; below that the rail becomes a top bar (brand plus Dashboard and About) so the editor keeps its canvas beside the part fields on small laptops.
 - A 64 px top bar with today's date and the High contrast toggle.
 - Page content capped at 1160 px with gutters `clamp(20px, 4.5vw, 84px)` (the `page` utility).
 - Dashboard: Diagrams and Students side by side from 1280 px, stacked below. Diagrams come first in the DOM, so the first Tab lands on "Explore Animal cell".
@@ -90,9 +90,9 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 ## Components
 
 - **Buttons:** primary is `accent` with white text, 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
-- **Rail:** brand mark (four braille-like dots in a tilted frame) and wordmark, the teacher and classes, Workspace nav (Dashboard is current on the dashboard, student and editor pages), and a footer: "Works offline. Everything stays on this laptop."
+- **Rail:** brand mark (four braille-like dots in a tilted frame) and wordmark, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
 - **Diagram row:** thumbnail, title, subject · grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
-- **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron; a Launch button sits beside it for the class assignment. Visitors (Guest) come first, then each class with its assignment tag ("Canada · due Tue"). A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
+- **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron; a Launch button sits beside it for the class assignment. Rows are grouped by class, each with its assignment tag ("Canada · due Tue"). A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
 - **Search and Add student:** search filters names and updates the count; Add student opens a dialog (name, class) and saves to this laptop.
 - **Attempt trail:** a thin vertical line with a ring per attempt, newest first; each row shows the part, the diagram, when (relative within the hour, then "Today, 9:26 AM"), and seconds to find. About reuses it for the diagram-to-student pipeline.
 - **Tags:** 6 px, `line` border, `surface` fill, `muted` text: assignment, explorer settings, "Draft" in the editor.
@@ -101,7 +101,7 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 ## Do's and Don'ts
 
 - **Do** keep the ink rail and the pale surface as the main structural contrast.
-- **Do** keep activity inside each student's page, and Guest reachable from the dashboard.
+- **Do** keep activity inside each student's page; the dashboard lists only students.
 - **Do** keep focus visible, controls labelled and every screen keyboard-operable.
 - **Don't** add a dashboard-wide activity feed, or turn rows into cards.
 - **Don't** add another accent colour, a display font or a downloaded font.

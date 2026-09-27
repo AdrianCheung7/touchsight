@@ -1,8 +1,8 @@
-// Part B. Dashboard (#/): the diagram library, then every class's students and Guest. Activity lives on each
+// Part B. Dashboard (#/): the diagram library, then every class's students. Activity lives on each
 // student's own page, never in a shared feed. Reloads every time the route returns here.
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { href } from '../contract/routes.ts'
-import { GUEST_ID, type Assignment, type ClassRoom, type Figure, type Session, type Student } from '../contract/types.ts'
+import { type Assignment, type ClassRoom, type Figure, type Session, type Student } from '../contract/types.ts'
 import { addStudent, listAssignments, listClasses, listFigures, listSessions, listStudents } from '../data/db.ts'
 import { Avatar, Icon } from './Shell.tsx'
 import { ago, dialogBox, field, iconBtn, primaryBtn, secondaryBtn, tag, textBtn, weekday } from './ui.ts'
@@ -124,7 +124,6 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
   const query = q.trim().toLocaleLowerCase()
   const matches = (name: string) => !query || name.toLocaleLowerCase().includes(query)
   const shown = students.filter((s) => matches(s.name)).sort((a, b) => a.name.localeCompare(b.name))
-  const guest = matches('Guest')
   const lastOf = (id: string) => sessions.find((x) => x.studentId === id) // sessions come newest first
 
   return (
@@ -159,13 +158,6 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
         </button>
       </div>
 
-      {/* Visitors first: a diagram opened with Explore lands here, so the newest try is in view on return. */}
-      {guest && (
-        <Group id="h-visitors" title="Visitors" aside={<span className="text-sm text-muted">Anyone exploring without a profile</span>}>
-          <Row student={{ id: GUEST_ID, name: 'Guest' }} last={lastOf(GUEST_ID)} now={now} />
-        </Group>
-      )}
-
       {classes.map((c) => {
         const list = shown.filter((s) => s.classId === c.id)
         if (list.length === 0) return null
@@ -186,7 +178,7 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
         )
       })}
 
-      {shown.length === 0 && !guest && (
+      {shown.length === 0 && (
         <div className="px-5 py-12 text-center">
           <h3 className="text-lg">No students found</h3>
           <p className="mt-2 text-muted">Try a different name, or clear the search.</p>
@@ -197,7 +189,7 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
       )}
 
       <p role="status" className="sr-only">
-        {query ? `${shown.length + Number(guest)} found` : said}
+        {query ? `${shown.length} found` : said}
       </p>
       {adding && (
         <AddStudent

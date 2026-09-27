@@ -59,8 +59,7 @@ function Rail({ page }: { page: Route['page'] }) {
       <nav aria-label="Main">
         <p className={`${railLabel} hidden lg:block`}>Workspace</p>
         <ul className="flex gap-1 lg:flex-col lg:gap-1.5">
-          {item(href.home(), 'Dashboard', page === 'home' || page === 'student' || page === 'edit')}
-          {item(href.upload(), 'Upload', page === 'upload')}
+          {item(href.home(), 'Dashboard', page !== 'about')}
           {item(href.about(), 'About', page === 'about')}
         </ul>
       </nav>
