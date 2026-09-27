@@ -62,7 +62,7 @@ function Rail({ page }: { page: Route['page'] }) {
 
       <p className="mt-auto hidden items-center gap-2.5 px-3 pt-4 text-[13px] leading-snug text-rail-muted lg:flex 2xl:text-sm">
         <span aria-hidden="true" className="size-[7px] shrink-0 rounded-full bg-rail-mark" />
-        Works fully offline and private.
+        Works fully offline and privately.
       </p>
     </header>
   )

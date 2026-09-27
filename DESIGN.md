@@ -99,7 +99,7 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 ## Components
 
 - **Buttons:** primary is `accent-strong` with white text (hover `accent-deep`), 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
-- **Rail:** the logo, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works fully offline and private." Uploading starts only from the "Upload a diagram" row under the diagrams.
+- **Rail:** the logo, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works fully offline and privately." Uploading starts only from the "Upload a diagram" row under the diagrams.
 - **Diagram row:** thumbnail, title, grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
 - **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron (dropped from 1536 px so the status stays on one line); a Launch button sits beside it for the class assignment. Rows are grouped by class; each class opens with a heading row: its name and "Assigned: Canada · due Tue". A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
 - **Search and Add student:** on the right of the Students heading, so the rule under it lines up with the one under Diagrams. Search filters names; Add student opens a dialog (name, class) and saves to this laptop.
