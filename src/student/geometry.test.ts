@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Point, Region } from '../contract/types.ts'
-import { adjacentRegion, area, centroid, clamp, hitTest, pointInPolygon, readingOrder, whereAmI } from './geometry.ts'
+import { adjacentRegion, area, centroid, clamp, hitTest, pointInPolygon, pointerToFigurePoint, readingOrder, whereAmI } from './geometry.ts'
 
 const region = (id: string, polygon: Point[], labelAnchor: Point = [0, 0]): Region => ({
   id,
@@ -89,6 +89,22 @@ describe('whereAmI', () => {
     [[8, 8], 'Lower right'],
   ] as const)('describes the third containing %o', (point, expected) => {
     expect(whereAmI([point[0], point[1]], 9, 9)).toBe(expected)
+  })
+})
+
+describe('pointerToFigurePoint', () => {
+  it('maps a landscape figure through centered contain bounds', () => {
+    expect(pointerToFigurePoint([160, 170], { left: 10, top: 20, width: 300, height: 300 }, { width: 200, height: 100 })).toEqual([100, 50])
+  })
+
+  it('maps a portrait figure through centered contain bounds', () => {
+    expect(pointerToFigurePoint([160, 170], { left: 10, top: 20, width: 300, height: 300 }, { width: 100, height: 200 })).toEqual([50, 100])
+  })
+
+  it('ignores letterbox and outside-element coordinates', () => {
+    const bounds = { left: 10, top: 20, width: 300, height: 300 }
+    expect(pointerToFigurePoint([160, 30], bounds, { width: 200, height: 100 })).toBeNull()
+    expect(pointerToFigurePoint([320, 170], bounds, { width: 200, height: 100 })).toBeNull()
   })
 })
 

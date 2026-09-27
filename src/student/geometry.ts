@@ -1,4 +1,4 @@
-import type { Point, Region } from '../contract/types.ts'
+import type { Figure, Point, Region } from '../contract/types.ts'
 import { wallSide, type WallSide } from './audio.ts'
 import { animalCellCallouts } from './figureAnnotations.ts'
 
@@ -48,6 +48,15 @@ export function centroid(polygon: Point[]): Point {
   return polygon.length
     ? polygon.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]] as Point, [0, 0] as Point).map((value) => value / polygon.length) as Point
     : [0, 0]
+}
+
+export function pointerToFigurePoint(client: Point, bounds: { left: number; top: number; width: number; height: number }, figure: Pick<Figure, 'width' | 'height'>): Point | null {
+  const scale = Math.min(bounds.width / figure.width, bounds.height / figure.height)
+  if (!(scale > 0) || !client.every(Number.isFinite)) return null
+  const x = client[0] - bounds.left - (bounds.width - figure.width * scale) / 2
+  const y = client[1] - bounds.top - (bounds.height - figure.height * scale) / 2
+  if (x < 0 || y < 0 || x > figure.width * scale || y > figure.height * scale) return null
+  return [x / scale, y / scale]
 }
 
 // ponytail: these image-pixel buffers are tuned for Animal cell; calibrate before using on other figures.
