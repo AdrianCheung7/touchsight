@@ -1,6 +1,6 @@
 // Part B. The app's database (docs/CONTRACT.md §5): the built-in classroom from seed.ts,
 // with every write kept in IndexedDB (idb-keyval) and merged on top when read.
-// Keys: `fig:<id>`, `prefs:<studentId>`, `sessions` (appended array).
+// Keys: `fig:<id>`, `prefs:<studentId>`, `sessions` and `students` (appended arrays).
 import { clear, del, entries, get, set, update } from 'idb-keyval'
 import {
   DEFAULT_PREFS,
@@ -77,15 +77,31 @@ async function prefsFor(id: string, base: StudentPrefs): Promise<StudentPrefs> {
   return { ...base, ...(saved && typeof saved === 'object' ? saved : {}) }
 }
 
+// Students the teacher added, after the built-in ones. Trust boundary: drop anything malformed.
+async function allStudents(): Promise<Student[]> {
+  const saved = await get<Student[]>('students')
+  const added = (Array.isArray(saved) ? saved : []).filter(
+    (s) => !!s && typeof s.id === 'string' && typeof s.name === 'string' && s.name.trim() !== '' && typeof s.classId === 'string',
+  )
+  return [...seed.students, ...added]
+}
+
 export async function listStudents(classId?: string): Promise<Student[]> {
-  const list = seed.students.filter((s) => !classId || s.classId === classId)
-  return Promise.all(list.map(async (s) => ({ ...clone(s), prefs: await prefsFor(s.id, s.prefs) })))
+  const list = (await allStudents()).filter((s) => !classId || s.classId === classId)
+  return Promise.all(list.map(async (s) => ({ ...clone(s), prefs: await prefsFor(s.id, s.prefs ?? DEFAULT_PREFS) })))
 }
 
 export async function getStudent(id: string): Promise<Student | undefined> {
   if (id === GUEST_ID) return { id: GUEST_ID, name: 'Guest', classId: '', prefs: await prefsFor(GUEST_ID, DEFAULT_PREFS) }
-  const s = seed.students.find((x) => x.id === id)
-  return s && { ...clone(s), prefs: await prefsFor(id, s.prefs) }
+  const s = (await allStudents()).find((x) => x.id === id)
+  return s && { ...clone(s), prefs: await prefsFor(id, s.prefs ?? DEFAULT_PREFS) }
+}
+
+// Not in the contract: only the teacher dashboard adds students.
+export async function addStudent(name: string, classId: string): Promise<Student> {
+  const s: Student = { id: `student-${crypto.randomUUID()}`, name: name.trim().slice(0, 80), classId, prefs: { ...DEFAULT_PREFS } }
+  await update<Student[]>('students', (old) => [...(Array.isArray(old) ? old : []), s])
+  return clone(s)
 }
 
 export async function saveStudentPrefs(id: string, prefs: StudentPrefs): Promise<void> {

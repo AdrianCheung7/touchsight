@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { href } from '../contract/routes.ts'
 import { resetDemo } from '../data/db.ts'
-import { CONTRAST_KEY } from './Header.tsx'
+import { CONTRAST_KEY } from './Shell.tsx'
 
-const btn = 'rounded-md border border-line px-3 py-2 text-left hover:border-ink'
+const btn = 'min-h-10 rounded-lg border border-field bg-surface px-3 text-left text-[15px] font-medium hover:bg-paper'
 
 export default function DemoPanel() {
   const [open, setOpen] = useState(false)
@@ -45,8 +45,8 @@ export default function DemoPanel() {
   }
 
   return (
-    <div role="dialog" aria-label="Presenter" className="fixed right-4 bottom-4 z-50 flex w-60 flex-col gap-2 rounded-xl border border-line bg-paper p-4 text-ink">
-      <p className="font-serif text-lg">Presenter</p>
+    <div role="dialog" aria-label="Presenter" className="fixed right-4 bottom-4 z-50 flex w-64 flex-col gap-2 rounded-[14px] border border-line bg-surface p-4 text-ink shadow-[0_20px_70px_rgb(12_42_54/0.22)]">
+      <p className="mb-1 font-semibold tracking-[-0.01em]">Presenter</p>
       <button ref={first} type="button" className={btn} onClick={reset}>
         Reset everything
       </button>

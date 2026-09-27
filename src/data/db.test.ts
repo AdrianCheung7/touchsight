@@ -86,6 +86,15 @@ describe('db', () => {
     expect(await db.getFigure('upload-1')).toBeUndefined()
   })
 
+  it('adds a student to a class, and reset removes them', async () => {
+    const s = await db.addStudent('  Ana M. ', 'g5')
+    expect(s).toMatchObject({ name: 'Ana M.', classId: 'g5', prefs: DEFAULT_PREFS })
+    expect((await db.listStudents('g5')).map((x) => x.name)).toContain('Ana M.')
+    expect(await db.getStudent(s.id)).toEqual(s)
+    await db.resetDemo()
+    expect(await db.getStudent(s.id)).toBeUndefined()
+  })
+
   it('keeps the seeded history realistic: nothing in the last hour, 3 students per class', async () => {
     const newest = (await db.listSessions())[0]
     expect(Date.now() - Date.parse(newest.at)).toBeGreaterThan(60 * 60_000)

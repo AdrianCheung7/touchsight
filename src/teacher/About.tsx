@@ -25,45 +25,54 @@ const SOURCES: [string, string][] = [
 
 export default function About() {
   return (
-    <main className="mx-auto max-w-[1100px] px-6 pb-24 pt-12">
-      <h1 tabIndex={-1} className="text-4xl tracking-tight">
+    <main className="page pb-20 pt-10">
+      <h1 tabIndex={-1} className="text-[34px] leading-[1.14] tracking-[-0.035em]">
         How TouchSight works
       </h1>
       <p className="mt-2 max-w-2xl text-muted">A blind student explores the layout of a diagram by sound, on a laptop trackpad, while their teacher prepares the diagrams and follows their progress.</p>
 
-      <ol aria-label="From diagram to student" className="mt-10 grid gap-3 md:grid-cols-5">
-        {PIPELINE.map(([title, text], i) => (
-          <li key={title} className="relative flex flex-col gap-2 rounded-xl border border-line p-5">
-            <span className="font-mono text-muted">{String(i + 1).padStart(2, '0')}</span>
-            <h2 className="text-xl">{title}</h2>
-            <p className="text-muted">{text}</p>
-            {i < PIPELINE.length - 1 && (
-              <span aria-hidden="true" className="absolute top-1/2 -right-3 z-10 hidden -translate-y-1/2 bg-paper text-accent md:block">
-                →
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
+      <div className="mt-10 grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <section aria-labelledby="pipeline-h">
+          <h2 id="pipeline-h" className="text-xl">
+            From diagram to student
+          </h2>
+          <ol className="trail mt-4 border-t border-line">
+            {PIPELINE.map(([title, text]) => (
+              <li key={title} className="grid min-h-20 grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-x-4 border-b border-line">
+                <span className="trail-mark" aria-hidden="true" />
+                <div className="py-3">
+                  <h3 className="text-base tracking-[-0.01em]">{title}</h3>
+                  <p className="mt-0.5 text-muted">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      <ul aria-label="Promises" className="mt-12 grid gap-8 border-y border-line py-10 md:grid-cols-3">
-        {CLAIMS.map(([big, text]) => (
-          <li key={big}>
-            <p className="font-serif text-5xl font-semibold tracking-tight">{big}</p>
-            <p className="mt-2 text-muted">{text}</p>
-          </li>
-        ))}
-      </ul>
+        <section aria-labelledby="promises-h">
+          <h2 id="promises-h" className="text-xl">
+            What it promises
+          </h2>
+          <ul className="mt-4 border-t border-line">
+            {CLAIMS.map(([big, text]) => (
+              <li key={big} className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-baseline gap-x-4 border-b border-line py-5">
+                <p className="text-[28px] font-semibold leading-none tracking-[-0.035em]">{big}</p>
+                <p className="text-muted">{text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
 
-      <div className="mt-12 grid gap-12 md:grid-cols-[2fr_1fr]">
+      <div className="mt-14 grid gap-x-14 gap-y-12 border-t border-line pt-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         <section aria-labelledby="sources-h">
-          <h2 id="sources-h" className="text-2xl tracking-tight">
+          <h2 id="sources-h" className="text-xl">
             Sources
           </h2>
           <ul className="mt-4 flex flex-col gap-3">
             {SOURCES.map(([text, url]) => (
               <li key={url}>
-                <a href={url} target="_blank" rel="noreferrer" className="rounded-sm underline decoration-line underline-offset-4 hover:decoration-ink">
+                <a href={url} target="_blank" rel="noreferrer" className="rounded-sm text-accent-strong underline decoration-accent/40 underline-offset-4 hover:decoration-accent-strong">
                   {text}
                 </a>
               </li>
@@ -71,13 +80,13 @@ export default function About() {
           </ul>
         </section>
         <section aria-labelledby="credits-h">
-          <h2 id="credits-h" className="text-2xl tracking-tight">
+          <h2 id="credits-h" className="text-xl">
             Credits
           </h2>
           <ul className="mt-4 flex flex-col gap-3 text-muted">
             <li>
               Animal cell: OpenStax, <cite>Anatomy &amp; Physiology</cite>, Rice University.{' '}
-              <a className="underline underline-offset-4" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
+              <a className="rounded-sm text-accent-strong underline decoration-accent/40 underline-offset-4 hover:decoration-accent-strong" href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
                 CC BY 4.0
               </a>
               .

@@ -7,7 +7,8 @@ import { explainRegion } from '../data/ai.ts'
 import { getFigure, saveFigure } from '../data/db.ts'
 import { exportSvg } from './exportSvg.ts'
 import { anchorFor, area, hull, inside } from './shapes.ts'
-import { primaryBtn, secondaryBtn } from './ui.ts'
+import { Icon } from './Shell.tsx'
+import { backLink, dialogBox, field, primaryBtn, secondaryBtn, tag, textBtn } from './ui.ts'
 
 const UNDO_LIMIT = 20
 const EMPTY_HINT = 'Trace each part the student should find. Click around its edge; press Enter to close.'
@@ -47,16 +48,18 @@ export default function Edit({ figureId }: { figureId: string }) {
     getFigure(figureId).then((f) => setLoaded(f ?? null))
   }, [figureId])
 
-  if (loaded === undefined) return <main className="mx-auto max-w-[1100px] px-6 py-12" aria-busy="true" />
+  if (loaded === undefined) return <main className="page pt-8" aria-busy="true" />
   if (loaded === null) {
     return (
-      <main className="mx-auto max-w-[1100px] px-6 py-12">
-        <h1 tabIndex={-1} className="text-4xl tracking-tight">
+      <main className="page pb-20 pt-8">
+        <a href={href.home()} className={backLink}>
+          <Icon name="back" />
+          Dashboard
+        </a>
+        <h1 tabIndex={-1} className="mt-7 text-3xl">
           Diagram not found
         </h1>
-        <a href={href.home()} className="mt-6 inline-block underline underline-offset-4">
-          Back to the dashboard
-        </a>
+        <p className="mt-2 text-muted">It may have been removed when the classroom was reset.</p>
       </main>
     )
   }
@@ -259,18 +262,22 @@ function Editor({ initial }: { initial: Figure }) {
   const missingCount = fig.regions.filter((r) => !r.explanation.trim()).length
 
   return (
-    <main className="mx-auto grid max-w-[1100px] gap-8 px-6 pb-24 pt-8 md:grid-cols-[minmax(0,1fr)_18rem]">
+    <main className="page grid gap-8 pb-20 pt-8 md:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="min-w-0">
+        <a href={href.home()} className={`${backLink} mb-4`}>
+          <Icon name="back" />
+          Dashboard
+        </a>
         <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-          <h1 ref={h1Ref} tabIndex={-1} className="text-3xl tracking-tight">
+          <h1 ref={h1Ref} tabIndex={-1} className="text-[28px] leading-[1.14] tracking-[-0.035em]">
             {fig.title}
           </h1>
-          <span className="text-muted">{saved ? 'All changes saved' : 'Saving…'}</span>
+          <span className="text-sm text-muted">{saved ? 'All changes saved' : 'Saving…'}</span>
         </div>
-        <p className="mb-3 min-h-6 text-muted">
+        <p className="mb-4 min-h-6 text-muted">
           {drawing ? (fig.regions.length === 0 ? EMPTY_HINT : DRAW_HINT) : 'Select a part to edit it. Drag its points; double-click an edge to add one. Shift-click to select several.'}
         </p>
-        <div className="relative overflow-hidden rounded-xl border border-line bg-white" style={{ aspectRatio: `${fig.width} / ${fig.height}` }}>
+        <div className="relative overflow-hidden rounded-lg border border-line bg-white" style={{ aspectRatio: `${fig.width} / ${fig.height}` }}>
           <svg
             ref={svgRef}
             viewBox={`0 0 ${fig.width} ${fig.height}`}
@@ -377,12 +384,12 @@ function Editor({ initial }: { initial: Figure }) {
 
         <section aria-labelledby="parts-h">
           <div className="mb-2 flex items-baseline justify-between">
-            <h2 id="parts-h" className="text-xl">
-              Parts <span className="font-sans text-base font-normal text-muted">({fig.regions.length})</span>
+            <h2 id="parts-h" className="text-lg">
+              Parts <span className="text-base font-normal tracking-normal text-muted tabular-nums">({fig.regions.length})</span>
             </h2>
             <button
               type="button"
-              className="rounded-sm text-muted underline-offset-4 hover:text-ink hover:underline disabled:no-underline disabled:opacity-50"
+              className={`${textBtn} disabled:opacity-50 disabled:hover:bg-transparent`}
               disabled={undo.length === 0}
               onClick={undoLast}
             >
@@ -390,16 +397,16 @@ function Editor({ initial }: { initial: Figure }) {
             </button>
           </div>
           {fig.regions.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-line p-4 text-muted">{EMPTY_HINT}</p>
+            <p className="rounded-lg border border-dashed border-field bg-surface p-4 text-muted">{EMPTY_HINT}</p>
           ) : (
-            <ul className="max-h-72 overflow-y-auto rounded-xl border border-line">
+            <ul className="max-h-72 overflow-y-auto rounded-lg border border-line bg-surface">
               {fig.regions.map((r) => (
                 <li key={r.id} className="border-b border-line last:border-b-0">
                   <button
                     type="button"
                     aria-pressed={sel.includes(r.id)}
                     onClick={(e) => pick(r.id, e.shiftKey || e.ctrlKey || e.metaKey)}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left ${sel.includes(r.id) ? 'bg-accent/10' : 'hover:bg-line/40'}`}
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left ${sel.includes(r.id) ? 'bg-accent-soft font-semibold text-accent-strong' : 'hover:bg-paper'}`}
                   >
                     <span className="truncate">{r.label}</span>
                     {writing.includes(r.id) ? (
@@ -407,7 +414,7 @@ function Editor({ initial }: { initial: Figure }) {
                     ) : r.origin === 'ai' ? (
                       <DraftBadge compact />
                     ) : (
-                      !r.explanation.trim() && <span className="shrink-0 text-muted">No explanation</span>
+                      !r.explanation.trim() && <span className="shrink-0 text-sm text-muted">No explanation</span>
                     )}
                   </button>
                 </li>
@@ -428,9 +435,9 @@ function Editor({ initial }: { initial: Figure }) {
         </section>
 
         {selected && (
-          <section aria-label={`Edit ${selected.label}`} className="flex flex-col gap-4 rounded-xl border border-line p-4">
+          <section aria-label={`Edit ${selected.label}`} className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-4">
             <label className="flex flex-col gap-1">
-              <span className="text-muted">Name</span>
+              <span className="text-sm font-semibold">Name</span>
               <input
                 ref={labelRef}
                 value={selected.label}
@@ -439,11 +446,11 @@ function Editor({ initial }: { initial: Figure }) {
                   updateRegion(selected.id, { label: e.target.value }, typingSnapshot.current)
                   typingSnapshot.current = false
                 }}
-                className="rounded-md border border-line bg-paper px-3 py-2"
+                className={field}
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="flex items-center justify-between gap-2 text-muted">
+              <span className="flex items-center justify-between gap-2 text-sm font-semibold">
                 Explanation
                 {selected.origin === 'ai' && <DraftBadge />}
               </span>
@@ -455,10 +462,10 @@ function Editor({ initial }: { initial: Figure }) {
                   updateRegion(selected.id, { explanation: e.target.value, origin: 'teacher' }, typingSnapshot.current)
                   typingSnapshot.current = false
                 }}
-                className="resize-y rounded-md border border-line bg-paper px-3 py-2"
+                className={`${field} resize-y`}
                 aria-describedby="word-count"
               />
-              <span id="word-count" className={words(selected.explanation) > 30 ? 'text-accent' : 'text-muted'}>
+              <span id="word-count" className={`text-sm tabular-nums ${words(selected.explanation) > 30 ? 'font-semibold text-accent-strong' : 'text-muted'}`}>
                 {words(selected.explanation)} / 30 words
               </span>
             </label>
@@ -505,24 +512,24 @@ function ExportDialog({ fig, onClose }: { fig: Figure; onClose: () => void }) {
   }, [link])
 
   return (
-    <dialog ref={ref} onClose={onClose} aria-labelledby="export-h" className="m-auto w-[min(920px,calc(100vw-32px))] rounded-xl border border-line bg-paper p-0 text-ink backdrop:bg-ink/40">
+    <dialog ref={ref} onClose={onClose} aria-labelledby="export-h" className={`${dialogBox} w-[min(920px,calc(100vw-32px))]`}>
       <div className="grid gap-6 p-6 md:grid-cols-[1fr_220px]">
         <div className="min-w-0">
-          <h2 id="export-h" className="text-2xl tracking-tight">
+          <h2 id="export-h" className="text-xl">
             Swell-paper SVG
           </h2>
           <p className="mt-1 text-muted">
             US Letter with a braille title.{' '}
             {keys.length ? `${keys.length} of ${fig.regions.length} labels are too long for their part, so they get braille key numbers, listed on page 2.` : 'Every part is labelled in braille.'}
           </p>
-          <img src={url} alt={`Tactile version of ${fig.title}`} className="mt-4 max-h-[60vh] w-full rounded-md border border-line bg-white object-contain object-top" />
+          <img src={url} alt={`Tactile version of ${fig.title}`} className="mt-4 max-h-[60vh] w-full rounded-lg border border-line bg-white object-contain object-top" />
         </div>
         <div className="flex flex-col gap-3">
           <a className={primaryBtn} href={url} download={`${fig.id}-swell-paper.svg`}>
             Download SVG
           </a>
           {qr && <img src={qr} alt="" width={176} height={176} className="self-center rounded-md border border-line bg-white p-1" />}
-          <p className="text-muted">Scan to open this diagram in the explorer.</p>
+          <p className="text-center text-sm text-muted">Scan to open this diagram in the explorer.</p>
           <form method="dialog" className="mt-auto">
             <button className={`${secondaryBtn} w-full`}>Close</button>
           </form>
@@ -534,11 +541,11 @@ function ExportDialog({ fig, onClose }: { fig: Figure; onClose: () => void }) {
 
 function DraftBadge({ compact = false }: { compact?: boolean }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-line px-2 text-muted">
+    <span className={`${tag} shrink-0`}>
       <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12">
         <path d="M6 0l1.4 4.6L12 6l-4.6 1.4L6 12l-1.4-4.6L0 6l4.6-1.4z" fill="currentColor" />
       </svg>
-      {compact ? 'Draft' : 'Draft — check it'}
+      {compact ? 'Draft' : 'Draft: check it'}
     </span>
   )
 }
