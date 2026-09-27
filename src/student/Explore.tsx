@@ -8,7 +8,7 @@ import { useExplorer } from './useExplorer.ts'
 export default function Explore(props: { figureId: string; studentId: string; target?: string }) {
   const stageRef = useRef<HTMLElement>(null)
   const figureAreaRef = useRef<HTMLDivElement>(null)
-  const { figure, phase, cursor, currentRegion, challenge, challengeElapsed, question, submitQuestion, updateQuestion, closeQuestion, loadError, lockError } = useExplorer({
+  const { figure, phase, cursor, currentRegion, challenge, challengeElapsed, question, submitQuestion, updateQuestion, finishSpeech, useQuestionInput, closeQuestion, loadError, lockError } = useExplorer({
     figureId: props.figureId,
     studentId: props.studentId,
     target: props.target,
@@ -210,8 +210,43 @@ export default function Explore(props: { figureId: string; studentId: string; ta
               </button>
             </div>
 
-            {question.status === 'listening' && (
-              <p className="mt-6 rounded-lg border border-line bg-white px-4 py-4 text-base text-muted">Listening for your question…</p>
+            {question.status === 'loading' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p role="status" aria-live="polite" className="text-base">Preparing speech recognition · {question.progress}%</p>
+                <p className="mt-2 text-sm text-muted">First use downloads about 52 MB of model files and caches them in this browser. Audio stays on this device.</p>
+                <button type="button" onClick={useQuestionInput} className="mt-4 rounded border border-line px-4 py-2 text-sm hover:bg-black/5">
+                  Type instead
+                </button>
+              </div>
+            )}
+            {question.status === 'microphone' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p role="status" aria-live="polite" className="text-base">Waiting for microphone access…</p>
+                <button type="button" onClick={useQuestionInput} className="mt-4 rounded border border-line px-4 py-2 text-sm hover:bg-black/5">
+                  Type instead
+                </button>
+              </div>
+            )}
+            {question.status === 'recording' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p role="status" aria-live="polite" className="text-base">Listening. Speak your question, then finish when you’re done.</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button type="button" onClick={finishSpeech} className="rounded-lg bg-ink px-5 py-3 text-sm font-medium text-white">
+                    Finish speaking
+                  </button>
+                  <button type="button" onClick={useQuestionInput} className="rounded border border-line px-4 py-2 text-sm hover:bg-black/5">
+                    Type instead
+                  </button>
+                </div>
+              </div>
+            )}
+            {question.status === 'transcribing' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p role="status" aria-live="polite" className="text-base">Transcribing on this device…</p>
+                <button type="button" onClick={useQuestionInput} className="mt-4 rounded border border-line px-4 py-2 text-sm hover:bg-black/5">
+                  Type instead
+                </button>
+              </div>
             )}
             {question.status === 'input' && (
               <form
@@ -230,7 +265,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                   placeholder="What does it do?"
                   className="w-full rounded-lg border border-line bg-white px-4 py-3 text-base outline-offset-2"
                 />
-                <p className="mt-2 text-sm text-muted">Speech input didn’t start, so you can type instead. Press Enter to ask.</p>
+                <p className="mt-2 text-sm text-muted">{question.error ?? 'Type your question below. Press Enter to ask.'}</p>
                 <button type="submit" disabled={!question.value.trim()} className="mt-5 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-white disabled:opacity-40">
                   Ask question
                 </button>

@@ -6,13 +6,16 @@ import { askQuestion } from '../data/ai.ts'
 import { announce as announceLive, chime, countdownClick, dispose, playSpatialCue, regionThunk, setPosition, startCue, sweep, testSound, thunk } from './audio.ts'
 import { elapsedMs as challengeElapsedMs, pauseChallenge, pickTarget, resumeChallenge, type Challenge } from './findIt.ts'
 import { adjacentRegion, centroid, clamp, hitTest, pointerToFigurePoint, whereAmI } from './geometry.ts'
-import { listenOnce } from './speechRecognition.ts'
+import { loadLocalTranscriber, startSpeechRecording, transcribeSpeech } from './speechRecognition.ts'
 
 type Phase = 'loading' | 'idle' | 'orienting' | 'exploring' | 'keyboard' | 'asking' | 'paused'
 
 export type QuestionState =
-  | { status: 'listening' }
-  | { status: 'input'; value: string }
+  | { status: 'loading'; progress: number }
+  | { status: 'microphone' }
+  | { status: 'recording' }
+  | { status: 'transcribing' }
+  | { status: 'input'; value: string; error?: string }
   | { status: 'thinking'; question: string }
   | { status: 'answer'; question: string; answer: string }
 
@@ -56,6 +59,8 @@ export function useExplorer({
   const challengeRef = useRef<Challenge | null>(null)
   const submitQuestionRef = useRef<(value: string) => void>(() => {})
   const updateQuestionRef = useRef<(value: string) => void>(() => {})
+  const finishSpeechRef = useRef<() => void>(() => {})
+  const useQuestionInputRef = useRef<() => void>(() => {})
   const closeQuestionRef = useRef<() => void>(() => {})
 
   useEffect(() => {
@@ -150,6 +155,7 @@ export function useExplorer({
       questionRun++
       questionController?.abort()
       questionController = undefined
+      finishSpeechRef.current = () => {}
       if (document.pointerLockElement === stageElement) document.exitPointerLock()
       setQuestion(null)
       const nextPhase = pause ? 'paused' : questionReturnPhase
@@ -177,6 +183,16 @@ export function useExplorer({
       await announce(answer, prefsRef.current)
     }
 
+    const switchToQuestionInput = (error?: string) => {
+      if (phaseRef.current !== 'asking') return
+      questionRun++
+      questionController?.abort()
+      questionController = undefined
+      finishSpeechRef.current = () => {}
+      setQuestion({ status: 'input', value: '', ...(error ? { error } : {}) })
+      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+    }
+
     const startQuestion = (currentFigure: Figure) => {
       const run = ++questionRun
       questionFigure = currentFigure
@@ -185,21 +201,46 @@ export function useExplorer({
       pauseFindIt()
       phaseRef.current = 'asking'
       setPhase('asking')
-      setQuestion({ status: 'listening' })
+      setQuestion({ status: 'loading', progress: 0 })
+      const controller = new AbortController()
+      questionController = controller
       void (async () => {
-        await announce('Ask your question.', prefsRef.current)
-        if (!active || run !== questionRun) return
-        const controller = new AbortController()
-        questionController = controller
-        const transcript = await listenOnce(controller.signal)
-        if (questionController === controller) questionController = undefined
-        if (!active || run !== questionRun) return
-        if (!transcript) {
-          setQuestion({ status: 'input', value: '' })
-          if (document.pointerLockElement === stageElement) document.exitPointerLock()
-          return
+        try {
+          await announce('Loading on-device speech recognition. You can type instead.', prefsRef.current)
+          await loadLocalTranscriber((progress) => {
+            if (active && run === questionRun && !controller.signal.aborted) setQuestion({ status: 'loading', progress })
+          })
+          if (!active || run !== questionRun || controller.signal.aborted) return
+          setQuestion({ status: 'microphone' })
+          const recording = await startSpeechRecording(controller.signal)
+          if (!active || run !== questionRun || controller.signal.aborted) return
+          setQuestion({ status: 'recording' })
+          finishSpeechRef.current = () => {
+            finishSpeechRef.current = () => {}
+            setQuestion({ status: 'transcribing' })
+            void (async () => {
+              try {
+                const audio = await recording.finish()
+                const transcript = await transcribeSpeech(audio)
+                if (!active || run !== questionRun || controller.signal.aborted) return
+                void answerQuestion(transcript, run, currentFigure, questionRegion)
+              } catch (error) {
+                if (active && run === questionRun && !controller.signal.aborted) {
+                  const message = error instanceof Error && error.message === 'No speech was recognized'
+                    ? 'No speech was recognized. Try again or type your question.'
+                    : 'Voice input could not be completed. Type your question instead.'
+                  switchToQuestionInput(message)
+                }
+              }
+            })()
+          }
+        } catch (error) {
+          if (!active || run !== questionRun || controller.signal.aborted) return
+          const message = error instanceof DOMException && ['NotAllowedError', 'SecurityError'].includes(error.name)
+            ? 'Microphone access was blocked. Check browser permissions or type your question instead.'
+            : 'On-device speech recognition could not start. Type your question instead.'
+          switchToQuestionInput(message)
         }
-        void answerQuestion(transcript, run, currentFigure, questionRegion)
       })()
     }
 
@@ -210,6 +251,7 @@ export function useExplorer({
     updateQuestionRef.current = (value) => {
       setQuestion((current) => current?.status === 'input' ? { ...current, value } : current)
     }
+    useQuestionInputRef.current = () => switchToQuestionInput()
     closeQuestionRef.current = closeQuestion
 
     const completeFindIt = (region: Region | null, currentFigure: Figure) => {
@@ -511,8 +553,10 @@ export function useExplorer({
       document.removeEventListener('pointermove', onPointerMove)
       questionRun++
       questionController?.abort()
+      finishSpeechRef.current = () => {}
       submitQuestionRef.current = () => {}
       updateQuestionRef.current = () => {}
+      useQuestionInputRef.current = () => {}
       closeQuestionRef.current = () => {}
       if (stageElement && document.pointerLockElement === stageElement) document.exitPointerLock()
       stopChallengeClock()
@@ -524,6 +568,8 @@ export function useExplorer({
     figure, phase, cursor, currentRegion, challenge, challengeElapsed, question, loadError, lockError,
     submitQuestion: (value: string) => submitQuestionRef.current(value),
     updateQuestion: (value: string) => updateQuestionRef.current(value),
+    finishSpeech: () => finishSpeechRef.current(),
+    useQuestionInput: () => useQuestionInputRef.current(),
     closeQuestion: () => closeQuestionRef.current(),
   }
 }
