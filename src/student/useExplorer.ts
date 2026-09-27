@@ -5,7 +5,7 @@ import { getFigure, getStudent, recordSession, saveStudentPrefs } from '../data/
 import { askQuestion } from '../data/ai.ts'
 import { announce as announceLive, chime, countdownClick, dispose, playSpatialCue, regionThunk, setPosition, startCue, sweep, testSound, thunk } from './audio.ts'
 import { elapsedMs as challengeElapsedMs, pauseChallenge, pickTarget, resumeChallenge, type Challenge } from './findIt.ts'
-import { adjacentRegion, centroid, clamp, hitTest, whereAmI } from './geometry.ts'
+import { adjacentRegion, centroid, clamp, hitTest, pointerToFigurePoint, whereAmI } from './geometry.ts'
 import { listenOnce } from './speechRecognition.ts'
 
 type Phase = 'loading' | 'idle' | 'orienting' | 'exploring' | 'keyboard' | 'asking' | 'paused'
@@ -479,7 +479,14 @@ export function useExplorer({
       const stage = stageRef.current
       const figureArea = figureAreaRef.current
       const currentFigure = figureRef.current
-      if (!stage || !figureArea || !currentFigure || document.pointerLockElement !== stage || phaseRef.current !== 'exploring') return
+      if (!figureArea || !currentFigure) return
+      if (phaseRef.current === 'keyboard') {
+        const bounds = figureArea.getBoundingClientRect()
+        const point = pointerToFigurePoint([event.clientX, event.clientY], bounds, currentFigure)
+        if (point) updateAt(point, currentFigure)
+        return
+      }
+      if (!stage || document.pointerLockElement !== stage || phaseRef.current !== 'exploring') return
       if (!event.movementX && !event.movementY) return
       const scale = Math.min(figureArea.clientWidth / currentFigure.width, figureArea.clientHeight / currentFigure.height)
       if (!(scale > 0)) return
