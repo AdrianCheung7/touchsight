@@ -137,18 +137,29 @@ export function useExplorer({
       startChallengeClock()
     }
 
-    const closeQuestion = () => {
+    const pauseExploration = () => {
+      const pausedChallenge = pauseFindIt()
+      phaseRef.current = 'paused'
+      setPhase('paused')
+      stageElement?.focus()
+      announce(pausedChallenge ? 'Challenge paused. Press Enter to continue.' : 'Paused. Press Enter to continue.', prefsRef.current)
+    }
+
+    const closeQuestion = (pause = false) => {
       if (phaseRef.current !== 'asking') return
       questionRun++
       questionController?.abort()
       questionController = undefined
       if (document.pointerLockElement === stageElement) document.exitPointerLock()
       setQuestion(null)
-      phaseRef.current = questionReturnPhase
-      setPhase(questionReturnPhase)
-      if (questionReturnPhase === 'keyboard') resumeFindIt()
+      const nextPhase = pause ? 'paused' : questionReturnPhase
+      phaseRef.current = nextPhase
+      setPhase(nextPhase)
+      if (nextPhase === 'keyboard') resumeFindIt()
       stageElement?.focus()
-      announce(questionReturnPhase === 'paused'
+      announce(pause
+        ? 'Question closed. Paused. Press Enter to continue.'
+        : nextPhase === 'paused'
         ? 'Question closed. Press Enter to continue exploring.'
         : 'Question closed.', prefsRef.current)
     }
@@ -285,10 +296,7 @@ export function useExplorer({
         }
       } else if (phaseRef.current === 'exploring') {
         lockPending.current = false
-        const pausedChallenge = pauseFindIt()
-        phaseRef.current = 'paused'
-        setPhase('paused')
-        announce(pausedChallenge ? 'Challenge paused. Press Enter to continue.' : 'Paused. Press Enter to continue.', prefsRef.current)
+        pauseExploration()
       }
     }
 
@@ -328,22 +336,41 @@ export function useExplorer({
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
+      const currentPhase = phaseRef.current
+      if (event.key === 'Escape' && currentPhase !== 'idle' && currentPhase !== 'loading') {
+        event.preventDefault()
+        if (currentPhase === 'asking') closeQuestion(true)
+        else if (currentPhase === 'orienting') {
+          challengeRun++
+          stopChallengeClock()
+          challengeRef.current = null
+          setChallenge(null)
+          phaseRef.current = 'paused'
+          setPhase('paused')
+          if (document.pointerLockElement === stageElement) document.exitPointerLock()
+          stageElement?.focus()
+          announce('Find-it cancelled. Paused. Press Enter to continue.', prefsRef.current)
+        } else if (currentPhase === 'exploring') {
+          pauseExploration()
+          if (document.pointerLockElement === stageElement) document.exitPointerLock()
+        } else if (currentPhase === 'keyboard') pauseExploration()
+        else stageElement?.focus()
+        return
+      }
       if (phaseRef.current === 'orienting') {
         event.preventDefault()
         event.stopPropagation()
         return
       }
-      if (phaseRef.current === 'asking') {
-        if (event.key === 'Escape') {
-          event.preventDefault()
-          closeQuestion()
-        }
+      if (phaseRef.current === 'asking') return
+      const currentFigure = figureRef.current
+      if (event.key === '?' && currentFigure && currentPhase !== 'loading') {
+        event.preventDefault()
+        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. F starts a find-it challenge. A asks a question. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
         return
       }
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) return
       const stage = stageRef.current
-      const currentFigure = figureRef.current
-      const currentPhase = phaseRef.current
       const active = currentPhase === 'exploring' || currentPhase === 'keyboard' || currentPhase === 'paused'
       const key = event.key.toLowerCase()
 
@@ -378,11 +405,6 @@ export function useExplorer({
       }
 
       if (!currentFigure) return
-      if (event.key === '?' && currentPhase !== 'idle' && currentPhase !== 'loading') {
-        event.preventDefault()
-        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. F starts a find-it challenge. A asks a question. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
-        return
-      }
       if (!active) return
 
       if ((currentPhase === 'exploring' || currentPhase === 'keyboard') && key === 'a') {
@@ -417,13 +439,7 @@ export function useExplorer({
         return
       }
 
-      if (event.key === 'Escape' && currentPhase === 'keyboard') {
-        event.preventDefault()
-        const pausedChallenge = pauseFindIt()
-        phaseRef.current = 'paused'
-        setPhase('paused')
-        announce(pausedChallenge ? 'Challenge paused. Press Enter to continue.' : 'Paused. Press Enter to continue.', prefsRef.current)
-      } else if (event.code === 'Space') {
+      if (event.code === 'Space') {
         event.preventDefault()
         if (regionRef.current?.explanation) announce(regionRef.current.explanation, prefsRef.current)
       } else if (key === 'w') {

@@ -129,10 +129,10 @@ What's already there for you:
 
 ## A7 · Accessibility pass on the explorer (~20 min)
 
-- [ ] Keyboard only, the whole screen: no traps, `Esc` always pauses, and focus returns to a sensible place after the sheet or help closes.
-- [ ] `prefers-reduced-motion`: no scaling or pulses (the highlight still switches instantly).
-- [ ] High contrast (`data-contrast="high"` on `<html>`): the top bar and sheet stay readable. The stage stays dark by design.
-- **Verify:** all three pass; Lighthouse accessibility ≥ 95 on the explorer route.
+- [x] Keyboard only, the whole screen: no traps, `Esc` always pauses, and focus returns to a sensible place after the sheet or help closes.
+- [x] `prefers-reduced-motion`: no scaling or pulses (the highlight still switches instantly).
+- [x] High contrast (`data-contrast="high"` on `<html>`): the top bar and sheet stay readable. The stage stays dark by design.
+- **Verify:** all three pass; Lighthouse accessibility 100 on the explorer route. Keyboard flows and the question sheet were checked in-browser.
 
 ## A8 · Polish (~30 min)
 

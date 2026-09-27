@@ -206,7 +206,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                 onClick={closeQuestion}
                 className="rounded border border-line px-3 py-2 text-sm hover:bg-black/5"
               >
-                Close <span className="text-muted">· Esc</span>
+                Close <span className="text-muted">· Esc pauses</span>
               </button>
             </div>
 
@@ -248,7 +248,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
                 <p className="mt-3 text-lg leading-relaxed">{question.answer}</p>
               </div>
             )}
-            <p className="mt-5 text-xs text-muted">The diagram stays still while you ask. Close with Escape to return to the diagram.</p>
+            <p className="mt-5 text-xs text-muted">The diagram stays still while you ask. Close to return, or press Escape to pause.</p>
           </section>
         </>
       )}
