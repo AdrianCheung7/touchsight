@@ -4,7 +4,7 @@ import Explore from './student/Explore.tsx'
 import About from './teacher/About.tsx'
 import DemoPanel from './teacher/DemoPanel.tsx'
 import Edit from './teacher/Edit.tsx'
-import Header from './teacher/Header.tsx'
+import Shell from './teacher/Shell.tsx'
 import Home from './teacher/Home.tsx'
 import StudentPage from './teacher/StudentPage.tsx'
 import Upload from './teacher/Upload.tsx'
@@ -44,18 +44,19 @@ export default function App() {
   return (
     <>
       <DemoPanel />
-      <Header page={route.page} />
-      {route.page === 'edit' ? (
-        <Edit key={route.figureId} figureId={route.figureId} />
-      ) : route.page === 'upload' ? (
-        <Upload />
-      ) : route.page === 'student' ? (
-        <StudentPage key={route.studentId} studentId={route.studentId} />
-      ) : route.page === 'about' ? (
-        <About />
-      ) : (
-        <Home />
-      )}
+      <Shell page={route.page}>
+        {route.page === 'edit' ? (
+          <Edit key={route.figureId} figureId={route.figureId} />
+        ) : route.page === 'upload' ? (
+          <Upload />
+        ) : route.page === 'student' ? (
+          <StudentPage key={route.studentId} studentId={route.studentId} />
+        ) : route.page === 'about' ? (
+          <About />
+        ) : (
+          <Home />
+        )}
+      </Shell>
     </>
   )
 }
