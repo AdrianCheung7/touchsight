@@ -5,10 +5,13 @@ import { href } from '../contract/routes.ts'
 import { type Assignment, type ClassRoom, type Figure, type Session, type Student } from '../contract/types.ts'
 import { addStudent, listAssignments, listClasses, listFigures, listSessions, listStudents } from '../data/db.ts'
 import { Avatar, Icon } from './Shell.tsx'
-import { ago, dialogBox, field, iconBtn, primaryBtn, secondaryBtn, tag, textBtn, weekday } from './ui.ts'
+import { ago, dialogBox, field, iconBtn, primaryBtn, secondaryBtn, textBtn, weekday } from './ui.ts'
 
 const HERO = 'animal-cell'
 const FRESH = 5 * 60_000
+// Every dashboard row (diagrams, class headings, students) is one height, so the dividers line up
+// across the columns. From 1536 px the rows grow to fill the 1920×1080 demo screen.
+const ROW = 'min-h-20 border-b border-line 2xl:min-h-32'
 
 interface Data {
   figures: Figure[]
@@ -44,7 +47,7 @@ export default function Home() {
       </h1>
       <p className="mt-2 text-muted">Prepare a diagram, then open a student to follow their find-it progress.</p>
       {data && (
-        <div className="mt-10 grid gap-x-14 gap-y-14 xl:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <div className="mt-10 grid gap-x-14 gap-y-14 xl:grid-cols-2 2xl:grid-cols-[minmax(0,5fr)_minmax(0,8fr)]">
           <Library figures={data.figures} />
           <Roster data={data} onAdded={() => setVersion((v) => v + 1)} />
         </div>
@@ -53,13 +56,16 @@ export default function Home() {
   )
 }
 
-function SectionHead({ id, title, note }: { id: string; title: string; note: string }) {
+function SectionHead({ id, title, note, children }: { id: string; title: string; note: string; children?: React.ReactNode }) {
   return (
-    <div className="mb-4">
-      <h2 id={id} className="text-xl">
-        {title}
-      </h2>
-      <p className="mt-1 text-sm text-muted">{note}</p>
+    <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+      <div>
+        <h2 id={id} className="text-xl">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-muted">{note}</p>
+      </div>
+      {children}
     </div>
   )
 }
@@ -70,10 +76,10 @@ function Library({ figures }: { figures: Figure[] }) {
       <SectionHead id="h-diagrams" title="Diagrams" note="Explore one as a student would, or edit its parts." />
       <ul className="border-t border-line">
         {figures.map((f) => (
-          <li key={f.id} className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-line py-4">
-            <img src={f.image} alt="" className="h-12 w-16 shrink-0 rounded-md border border-line bg-white object-contain p-0.5" />
-            <div className="min-w-44 flex-1">
-              <h3 className="truncate text-base tracking-[-0.01em]">{f.title}</h3>
+          <li key={f.id} className={`flex flex-wrap items-center gap-x-4 gap-y-3 py-3 2xl:gap-x-5 ${ROW}`}>
+            <img src={f.image} alt="" className="h-12 w-16 shrink-0 rounded-md border border-line bg-white object-contain p-0.5 2xl:h-18 2xl:w-24" />
+            <div className="min-w-40 flex-1">
+              <h3 className="truncate text-base tracking-[-0.01em] 2xl:text-lg">{f.title}</h3>
               <p className="text-sm text-muted">
                 {[f.subject, f.gradeBand, f.regions.length === 1 ? '1 part' : `${f.regions.length} parts`]
                   .filter(Boolean)
@@ -96,12 +102,12 @@ function Library({ figures }: { figures: Figure[] }) {
           </li>
         ))}
         <li>
-          <a href={href.upload()} className="group flex items-center gap-4 border-b border-line py-4 hover:bg-surface/85">
-            <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-md border border-dashed border-accent/45 text-accent">
+          <a href={href.upload()} className={`group flex items-center gap-4 py-3 hover:bg-surface/85 2xl:gap-5 ${ROW}`}>
+            <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-md border border-dashed border-accent/45 text-accent 2xl:h-18 2xl:w-24">
               <Icon name="upload" />
             </span>
             <span className="flex-1">
-              <span className="block font-semibold tracking-[-0.01em]">Upload a diagram</span>
+              <span className="block font-semibold tracking-[-0.01em] 2xl:text-lg">Upload a diagram</span>
               <span className="block text-sm text-muted">PNG or JPG, up to 10 MB. You trace its parts next.</span>
             </span>
             <Icon name="chevron" className="mr-2 text-muted group-hover:text-accent-strong" />
@@ -125,44 +131,44 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
 
   return (
     <section aria-labelledby="h-students">
-      <SectionHead id="h-students" title="Students" note="Open a student to see their attempts and settings." />
-
-      <div className="flex flex-wrap items-center gap-3 border-b border-line pb-4">
-        <label className="flex min-h-10.5 min-w-52 max-w-md flex-1 items-center gap-2.5 rounded-lg border border-field bg-surface px-3 has-[input:focus-visible]:border-accent has-[input:focus-visible]:outline-3 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus">
-          <Icon name="search" className="text-muted" />
-          <span className="sr-only">Find a student</span>
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Find a student"
-            className="min-w-0 flex-1 bg-transparent py-2 outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
-          />
-          {q && (
-            <button type="button" className={`${iconBtn} -mr-1.5 size-7`} onClick={() => setQ('')} aria-label="Clear search">
-              <Icon name="close" />
-            </button>
-          )}
-        </label>
-        <button type="button" className={secondaryBtn} onClick={() => setAdding(true)}>
-          <Icon name="plus" />
-          Add student
-        </button>
-      </div>
+      <SectionHead id="h-students" title="Students" note="Open a student to see their attempts and settings.">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex min-h-10.5 w-72 min-w-52 items-center gap-2.5 rounded-lg border border-field bg-surface px-3 has-[input:focus-visible]:border-accent has-[input:focus-visible]:outline-3 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-focus">
+            <Icon name="search" className="text-muted" />
+            <span className="sr-only">Find a student</span>
+            <input
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Find a student"
+              className="min-w-0 flex-1 bg-transparent py-2 outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:appearance-none"
+            />
+            {q && (
+              <button type="button" className={`${iconBtn} -mr-1.5 size-7`} onClick={() => setQ('')} aria-label="Clear search">
+                <Icon name="close" />
+              </button>
+            )}
+          </label>
+          <button type="button" className={secondaryBtn} onClick={() => setAdding(true)}>
+            <Icon name="plus" />
+            Add student
+          </button>
+        </div>
+      </SectionHead>
 
       {/* From 1536 px the two classes sit side by side, so both fit on one screen. */}
-      <div className="2xl:grid 2xl:grid-cols-2 2xl:gap-x-10">
+      <div className="border-t border-line 2xl:grid 2xl:grid-cols-2 2xl:gap-x-10">
         {classes.map((c) => {
           const list = shown.filter((s) => s.classId === c.id)
           if (list.length === 0) return null
           const a = assignments.find((x) => x.classId === c.id)
           const fig = a && figures.find((f) => f.id === a.figureId)
           return (
-            <Group key={c.id} id={`h-class-${c.id}`} title={c.name} aside={a && fig && <span className={tag}>{fig.title} · due {weekday(a.due)}</span>}>
+            <Group key={c.id} id={`h-class-${c.id}`} title={c.name} note={a && fig && `Assigned: ${fig.title} · due ${weekday(a.due)}`}>
               {list.map((s) => (
                 <Row key={s.id} student={s} last={lastOf(s.id)} now={now}>
                   {a && fig && (
-                    <a className={`${secondaryBtn} min-h-9 px-3 text-sm`} href={href.explore(a.figureId, s.id)} aria-label={`Launch ${fig.title} as ${s.name}`}>
+                    <a className={`${secondaryBtn} min-h-9 self-center px-3 text-sm`} href={href.explore(a.figureId, s.id)} aria-label={`Launch ${fig.title} as ${s.name}`}>
                       Launch
                     </a>
                   )}
@@ -201,16 +207,16 @@ function Roster({ data, onAdded }: { data: Data; onAdded: () => void }) {
   )
 }
 
-function Group({ id, title, aside, children }: { id: string; title: string; aside?: React.ReactNode; children: React.ReactNode }) {
+function Group({ id, title, note, children }: { id: string; title: string; note?: string | false; children: React.ReactNode }) {
   return (
-    <section aria-labelledby={id} className="mt-7">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 pb-2">
-        <h3 id={id} className="text-base tracking-[-0.01em]">
+    <section aria-labelledby={id}>
+      <div className={`flex flex-col justify-center py-3 ${ROW}`}>
+        <h3 id={id} className="text-base tracking-[-0.01em] 2xl:text-lg">
           {title}
         </h3>
-        {aside}
+        {note && <p className="text-sm text-muted">{note}</p>}
       </div>
-      <ul className="border-t border-line">{children}</ul>
+      <ul>{children}</ul>
     </section>
   )
 }
@@ -218,11 +224,11 @@ function Group({ id, title, aside, children }: { id: string; title: string; asid
 function Row({ student, last, now, children }: { student: Pick<Student, 'id' | 'name'>; last?: Session; now: number; children?: React.ReactNode }) {
   const fresh = !!last && now - Date.parse(last.at) < FRESH
   return (
-    <li className={`flex items-center gap-3 border-b border-line pr-1 ${fresh ? 'fresh-row' : ''}`}>
-      <a href={href.student(student.id)} className="group grid min-h-[4.5rem] flex-1 grid-cols-[2.625rem_minmax(0,1fr)_auto] items-center gap-4 rounded-md px-2 hover:bg-surface/85">
+    <li className={`flex gap-3 pr-1 ${ROW} ${fresh ? 'fresh-row' : ''}`}>
+      <a href={href.student(student.id)} className="group grid flex-1 grid-cols-[2.625rem_minmax(0,1fr)_auto] items-center gap-4 rounded-md px-2 hover:bg-surface/85 2xl:grid-cols-[3rem_minmax(0,1fr)_auto]">
         <Avatar name={student.name} />
         <span className="min-w-0">
-          <span className="block truncate font-semibold tracking-[-0.01em]">{student.name}</span>
+          <span className="block truncate font-semibold tracking-[-0.01em] 2xl:text-lg">{student.name}</span>
           <span className={`block text-sm ${fresh ? 'font-semibold text-accent-strong' : 'text-muted'}`}>
             {last ? `Active ${ago(last.at, now)}` : 'No attempts yet'}
           </span>

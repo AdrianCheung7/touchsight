@@ -134,7 +134,7 @@ export function Avatar({ name, large = false }: { name: string; large?: boolean 
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex shrink-0 items-center justify-center rounded-full border border-accent/25 bg-accent-soft font-semibold text-accent-strong tabular-nums ${large ? 'size-14 text-lg' : 'size-10.5 text-[13px]'}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border border-accent/25 bg-accent-soft font-semibold text-accent-strong tabular-nums ${large ? 'size-14 text-lg' : 'size-10.5 text-[13px] 2xl:size-12 2xl:text-sm'}`}
     >
       {initials(name)}
     </span>
