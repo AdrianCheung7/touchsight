@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
-/* Design tokens (DESIGN.md, "The Marine Field Log"). Use them as Tailwind classes: bg-paper, text-ink, border-line, bg-rail…
+/* Design tokens (DESIGN.md). Brand: navy #21386C, paper #F8FAFC, blue #0579FB. Use them as Tailwind classes: bg-paper, text-ink…
    Part A's explorer uses paper, ink, muted, line, accent and stage, so those names never change. */
 @theme {
-  --color-paper: #f4f8f9;
+  --color-paper: #f8fafc;
   --color-surface: #ffffff;
-  --color-ink: #102b38;
-  --color-muted: #526b76;
-  --color-line: #dfe8eb;
-  --color-field: #cddce0;
-  --color-accent: #08788a;
-  --color-accent-strong: #075d6c;
-  --color-accent-soft: #e6f5f6;
-  --color-focus: #1f97a6;
-  --color-rail: #0c2a36;
-  --color-rail-active: #173d4b;
-  --color-rail-ink: #f3f8f9;
-  --color-rail-muted: #a5bbc1;
-  --color-rail-mark: #76d7df;
-  --color-stage: #081c24;
+  --color-ink: #21386c;
+  --color-muted: #52618a;
+  --color-line: #e2e8f0;
+  --color-field: #cbd5e1;
+  --color-accent: #0579fb;
+  --color-accent-strong: #0466d6; /* the brand blue, one step deeper: white text on it passes AA */
+  --color-accent-deep: #0453ae;
+  --color-accent-soft: #e8f2ff;
+  --color-focus: #0579fb;
+  --color-rail: #21386c;
+  --color-rail-active: #2d4a85;
+  --color-rail-ink: #f8fafc;
+  --color-rail-muted: #afc0dd;
+  --color-rail-mark: #5aa7ff;
+  --color-stage: #152447;
 
   /* Apple's system font where it exists; Segoe UI Variable on Windows. Nothing is downloaded. */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
@@ -37,6 +38,7 @@
   --color-field: #000000;
   --color-accent: #0000ee;
   --color-accent-strong: #00008b;
+  --color-accent-deep: #000066;
   --color-accent-soft: #e6e6ff;
   --color-focus: #0000ee;
   --color-rail: #000000;

@@ -2,22 +2,23 @@
 name: TouchSight
 description: A calm teacher workspace for preparing diagrams and following each student's find-it progress.
 colors:
-  paper: "#f4f8f9"
+  paper: "#f8fafc"
   surface: "#ffffff"
-  ink: "#102b38"
-  muted: "#526b76"
-  line: "#dfe8eb"
-  field: "#cddce0"
-  accent: "#08788a"
-  accent-strong: "#075d6c"
-  accent-soft: "#e6f5f6"
-  focus: "#1f97a6"
-  rail: "#0c2a36"
-  rail-active: "#173d4b"
-  rail-ink: "#f3f8f9"
-  rail-muted: "#a5bbc1"
-  rail-mark: "#76d7df"
-  stage: "#081c24"
+  ink: "#21386c"
+  muted: "#52618a"
+  line: "#e2e8f0"
+  field: "#cbd5e1"
+  accent: "#0579fb"
+  accent-strong: "#0466d6"
+  accent-deep: "#0453ae"
+  accent-soft: "#e8f2ff"
+  focus: "#0579fb"
+  rail: "#21386c"
+  rail-active: "#2d4a85"
+  rail-ink: "#f8fafc"
+  rail-muted: "#afc0dd"
+  rail-mark: "#5aa7ff"
+  stage: "#152447"
 typography:
   family: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif'
   headline: { fontSize: "34px", fontWeight: 650, lineHeight: 1.14, letterSpacing: "-0.035em" }
@@ -38,25 +39,32 @@ Source of truth for the look of the teacher screens. Tokens live in `src/index.c
 
 ## Overview
 
-**Creative North Star: "The Marine Field Log."** The teacher workspace borrows the quiet order of a marine research dive log: an ink-blue rail gives the class a stable home, a pale working surface keeps names and records easy to scan, one restrained teal family marks actions and the sequence of a student's attempts, and focus is always a visible cyan. Apple's system font keeps controls familiar without bundling font files.
+**Brand:** the TouchSight logo (an eye whose pupil gives way to braille dots and sound waves; "Touch" in white, "Sight" in blue) on three colours: navy `#21386C`, paper `#F8FAFC` and blue `#0579FB`. The navy rail gives the class a stable home and carries the logo; the pale paper keeps names and records easy to scan; the blue marks actions, the sequence of a student's attempts and keyboard focus. Apple's system font keeps controls familiar without bundling font files. The layout grammar comes from the "Marine Field Log" template: a rail, divided rows and a ringed trail.
 
 The roster is an ordered index, not a feed. A teacher opens one student to see that student's summary, settings and attempts, then returns to the dashboard. There is no dashboard-wide activity feed.
 
-- Ink-blue rail against a pale, lightly divided working surface.
-- Teal for actions and the attempt trail; cyan for keyboard focus.
+- Navy rail against a pale, lightly divided working surface.
+- Blue for actions, the attempt trail and keyboard focus.
 - Names first; personal activity only on the student's own page.
 - System typography, tabular figures, fixed-column records.
 
+## Logo
+
+- `public/logo.png` (608×111, transparent): the full logo, only on the navy rail (its "Touch" is white). 34 px tall on desktop, 28 px in the phone top bar, with "Teacher workspace" under it.
+- `public/logo-mark.png` (256×256, transparent): the eye alone. The favicon, and the 64 px mark in empty states on light surfaces.
+- Both are crops of the supplied artwork; never redraw or recolour them.
+
 ## Colors
 
-- **Accent (Marine Teal)** `accent`: primary buttons, the trail, selected parts in the editor. Hover deepens to `accent-strong`; `accent-soft` is the pale fill for selected rows, avatars and the fresh-row flash.
-- **Focus** `focus`: every keyboard focus ring on light surfaces (3 px, 3 px offset). It is a deeper cyan than the template's `#56bbc7` so the ring clears 3:1 against the page. On the rail, focus uses `rail-mark`.
-- **Neutrals:** `ink` text, `muted` supporting text (5.3:1 on paper), `paper` page, `surface` controls and dialogs, `line` dividers, `field` input and secondary-button borders.
-- **Rail:** `rail` background, `rail-active` current item, `rail-ink` / `rail-muted` text, `rail-mark` the brand dots and current-item marker.
-- **Stage** `stage`: the explorer's dark background (the accent's "Found" timer on it stays above 3:1).
+- **Blue** `accent` `#0579FB`: the logo's blue. Focus rings, the trail, selected parts in the editor, sparklines, icons and markers.
+- **Blue, one step deeper** `accent-strong` `#0466D6`: primary button fills and blue text (white on `#0579FB` is only 4.1:1, under AA; this step is 5.4:1). Hover goes to `accent-deep`. `accent-soft` is the pale fill for selected rows, avatars and the fresh-row flash.
+- **Navy** `ink` / `rail` `#21386C`: all text (10.9:1 on paper) and the rail. `muted` is a navy-tinted slate for supporting text (5.8:1).
+- **Paper** `#F8FAFC` page, `surface` white controls and dialogs, `line` dividers, `field` input and secondary-button borders.
+- **Rail:** `rail-active` current item, `rail-ink` / `rail-muted` text, `rail-mark` (a lighter blue that stays readable on navy) the current-item marker and rail focus.
+- **Stage** `stage`: the explorer's deep navy background (the accent's "Found" timer on it stays above 3:1).
 - **High contrast** (`data-contrast="high"` on `<html>`, remembered): every token switches to black on white with `#0000ee` actions and a black rail. The explorer inherits it.
 
-**The One Focus Color Rule.** Focus is always the cyan ring; teal is for actions and progression. Nothing relies on colour alone: the trail uses rings and a line, the current nav item a marker, fresh activity the words "Active just now".
+**The One Accent Rule.** Blue is the only accent. Nothing relies on colour alone: the trail uses rings and a line, the current nav item a marker, fresh activity the words "Active just now".
 
 ## Typography
 
@@ -89,8 +97,8 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 
 ## Components
 
-- **Buttons:** primary is `accent` with white text, 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
-- **Rail:** brand mark (four braille-like dots in a tilted frame) and wordmark, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
+- **Buttons:** primary is `accent-strong` with white text (hover `accent-deep`), 42 px min height, 16 px padding, 15 px semibold; secondary is `surface` with a `field` border. Press scales to 0.98. Disabled is 50% opacity.
+- **Rail:** the logo with "Teacher workspace" under it, the teacher and classes, Workspace nav (Dashboard, current on every screen but About, and About), and a footer: "Works offline. Everything stays on this laptop." Uploading starts only from the "Upload a diagram" row under the diagrams.
 - **Diagram row:** thumbnail, title, subject · grade · parts, then Explore (primary) and Edit (secondary). The last row uploads a diagram.
 - **Student row:** avatar initials, name, "Active 5 minutes ago" / "No attempts yet", chevron; a Launch button sits beside it for the class assignment. Rows are grouped by class, each with its assignment tag ("Canada · due Tue"). A row active in the last five minutes flashes `accent-soft` once and its status turns `accent-strong`.
 - **Search and Add student:** search filters names and updates the count; Add student opens a dialog (name, class) and saves to this laptop.
@@ -104,5 +112,5 @@ Buttons, inputs, search and nav items 8 px; tags 6 px; dialogs 14 px; avatars an
 - **Do** keep activity inside each student's page; the dashboard lists only students.
 - **Do** keep focus visible, controls labelled and every screen keyboard-operable.
 - **Don't** add a dashboard-wide activity feed, or turn rows into cards.
-- **Don't** add another accent colour, a display font or a downloaded font.
+- **Don't** add another accent colour, a display font or a downloaded font, or put the full logo on a light surface.
 - **Don't** label any data "sample", "mock", "seed" or similar on screen.

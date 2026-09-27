@@ -125,7 +125,7 @@ export default function StudentPage({ studentId }: { studentId: string }) {
             </div>
             {sessions.length === 0 ? (
               <div className="flex flex-col items-center border-t border-line px-5 pt-14 pb-16 text-center">
-                <Mark className="mb-4 text-accent" />
+                <Mark className="mb-3" />
                 <h3 className="text-lg">No find-it attempts yet</h3>
                 <p className="mt-2 max-w-sm text-muted">When {firstName} finishes a find-it challenge, it appears here.</p>
               </div>

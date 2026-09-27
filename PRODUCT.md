@@ -40,6 +40,7 @@ A teacher-owned diagram pipeline: diagram → teacher traces parts → figure da
 
 - Name: **TouchSight**. Teacher persona: **Ms. Rivera**.
 - **Typeface: Apple's system font** (the stack Apple uses on its own sites: SF Pro Display/Text via `-apple-system`), falling back to Segoe UI Variable on Windows. SF Pro is not bundled (licence).
+- **Logo and colours:** the TouchSight logo (`public/logo.png`, eye mark `public/logo-mark.png`) on navy `#21386C`, paper `#F8FAFC` and blue `#0579FB`.
 - Tone: calm, serious, trustworthy, like a tool a school would adopt; never cute.
 
 ## Evidence on Hand

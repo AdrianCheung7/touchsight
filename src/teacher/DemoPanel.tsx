@@ -45,7 +45,7 @@ export default function DemoPanel() {
   }
 
   return (
-    <div role="dialog" aria-label="Presenter" className="fixed right-4 bottom-4 z-50 flex w-64 flex-col gap-2 rounded-[14px] border border-line bg-surface p-4 text-ink shadow-[0_20px_70px_rgb(12_42_54/0.22)]">
+    <div role="dialog" aria-label="Presenter" className="fixed right-4 bottom-4 z-50 flex w-64 flex-col gap-2 rounded-[14px] border border-line bg-surface p-4 text-ink shadow-[0_20px_70px_rgb(33_56_108/0.22)]">
       <p className="mb-1 font-semibold tracking-[-0.01em]">Presenter</p>
       <button ref={first} type="button" className={btn} onClick={reset}>
         Reset everything

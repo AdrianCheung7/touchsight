@@ -1,4 +1,4 @@
-// Part B. The teacher workspace frame (DESIGN.md): the ink-blue rail with the brand, classes and navigation,
+// Part B. The teacher workspace frame (DESIGN.md): the navy rail with the logo, classes and navigation,
 // and a top bar with the date and the high-contrast toggle. Plus the small drawn marks every screen shares.
 import { useState } from 'react'
 import { href, type Route } from '../contract/routes.ts'
@@ -38,12 +38,9 @@ function Rail({ page }: { page: Route['page'] }) {
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 bg-rail px-5 py-4 text-rail-ink lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-start lg:overflow-y-auto lg:px-[18px] lg:pb-5 lg:pt-7">
-      <a href={href.home()} className="flex items-center gap-3 rounded-lg px-1.5 py-0.5 focus-visible:outline-rail-mark">
-        <Mark className="text-rail-mark" />
-        <span className="flex flex-col">
-          <span className="text-base font-semibold tracking-[-0.025em] text-white">TouchSight</span>
-          <span className="hidden text-[13px] text-rail-muted lg:block">Teacher workspace</span>
-        </span>
+      <a href={href.home()} className="flex flex-col gap-1.5 rounded-lg px-1.5 py-1 focus-visible:outline-rail-mark">
+        <img src="/logo.png" alt="TouchSight" width={608} height={111} className="h-7 w-auto lg:h-[34px]" />
+        <span className="hidden pl-0.5 text-[13px] text-rail-muted lg:block">Teacher workspace</span>
       </a>
 
       <div className="hidden lg:mt-11 lg:mb-9 lg:block">
@@ -109,19 +106,9 @@ function Topbar() {
   )
 }
 
-// The brand mark: a braille-like cell of four dots in a tilted frame.
+// The logo's eye on its own (also the favicon), for empty states.
 export function Mark({ className = '' }: { className?: string }) {
-  return (
-    <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34" className={`shrink-0 ${className}`}>
-      <g transform="rotate(-7 17 17)" fill="currentColor">
-        <rect x="2.5" y="2.5" width="29" height="29" rx="10" fill="none" stroke="currentColor" strokeOpacity="0.5" />
-        <circle cx="12.75" cy="12.75" r="3.5" />
-        <circle cx="21.25" cy="12.75" r="3.5" />
-        <circle cx="12.75" cy="21.25" r="3.5" />
-        <circle cx="21.25" cy="21.25" r="3.5" opacity="0.45" />
-      </g>
-    </svg>
-  )
+  return <img src="/logo-mark.png" alt="" width={256} height={256} className={`size-16 shrink-0 ${className}`} />
 }
 
 const ICONS = {

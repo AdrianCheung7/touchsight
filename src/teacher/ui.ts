@@ -40,14 +40,14 @@ export const initials = (name: string) =>
 
 const btn =
   'inline-flex min-h-10.5 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-[15px] font-semibold transition-[background-color,scale] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50'
-export const primaryBtn = `${btn} bg-accent text-white hover:bg-accent-strong`
+export const primaryBtn = `${btn} bg-accent-strong text-white hover:bg-accent-deep`
 export const secondaryBtn = `${btn} border border-field bg-surface text-ink hover:bg-paper`
 export const textBtn = 'rounded-md px-2 py-1 font-semibold text-accent-strong hover:bg-accent-soft'
 export const iconBtn = 'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted hover:bg-paper hover:text-ink'
 export const field = 'min-h-10.5 rounded-lg border border-field bg-surface px-3 py-2 text-ink'
 export const tag = 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-line bg-surface px-2 py-0.5 text-sm text-muted'
 export const backLink = 'inline-flex items-center gap-2 rounded-md py-1 pr-2 text-sm font-medium text-muted hover:text-accent-strong'
-export const dialogBox = 'm-auto rounded-[14px] border border-line bg-surface p-0 text-ink shadow-[0_20px_70px_rgb(12_42_54/0.22)]'
+export const dialogBox = 'm-auto rounded-[14px] border border-line bg-surface p-0 text-ink shadow-[0_20px_70px_rgb(33_56_108/0.22)]'
 
 export const studentName = (students: Student[], id: string) =>
   id === GUEST_ID ? 'Guest' : (students.find((s) => s.id === id)?.name ?? 'A student')
