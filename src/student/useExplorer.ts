@@ -2,11 +2,19 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { Figure, Point, Region, StudentPrefs } from '../contract/types.ts'
 import { getFigure, getStudent, recordSession, saveStudentPrefs } from '../data/db.ts'
+import { askQuestion } from '../data/ai.ts'
 import { announce as announceLive, chime, countdownClick, dispose, playSpatialCue, regionThunk, setPosition, startCue, sweep, testSound, thunk } from './audio.ts'
 import { elapsedMs as challengeElapsedMs, pauseChallenge, pickTarget, resumeChallenge, type Challenge } from './findIt.ts'
 import { adjacentRegion, centroid, clamp, hitTest, whereAmI } from './geometry.ts'
+import { listenOnce } from './speechRecognition.ts'
 
-type Phase = 'loading' | 'idle' | 'orienting' | 'exploring' | 'keyboard' | 'paused'
+type Phase = 'loading' | 'idle' | 'orienting' | 'exploring' | 'keyboard' | 'asking' | 'paused'
+
+export type QuestionState =
+  | { status: 'listening' }
+  | { status: 'input'; value: string }
+  | { status: 'thinking'; question: string }
+  | { status: 'answer'; question: string; answer: string }
 
 // ponytail: 1.0 is the default; tune on the demo laptop's trackpad.
 const SENSITIVITY = 1.0
@@ -35,6 +43,7 @@ export function useExplorer({
   const [currentRegion, setCurrentRegion] = useState<Region | null>(null)
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [challengeElapsed, setChallengeElapsed] = useState(0)
+  const [question, setQuestion] = useState<QuestionState | null>(null)
   const [loadError, setLoadError] = useState('')
   const [lockError, setLockError] = useState('')
   const figureRef = useRef<Figure | null>(null)
@@ -45,11 +54,19 @@ export function useExplorer({
   const lockPending = useRef(false)
   const started = useRef(false)
   const challengeRef = useRef<Challenge | null>(null)
+  const submitQuestionRef = useRef<(value: string) => void>(() => {})
+  const updateQuestionRef = useRef<(value: string) => void>(() => {})
+  const closeQuestionRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     let active = true
     let challengeInterval: number | undefined
     let challengeRun = 0
+    let questionRun = 0
+    let questionController: AbortController | undefined
+    let questionReturnPhase: Phase = 'keyboard'
+    let questionFigure: Figure | null = null
+    let questionRegion: Region | null = null
     const stageElement = stageRef.current
     figureRef.current = null
     phaseRef.current = 'loading'
@@ -72,13 +89,14 @@ export function useExplorer({
       challengeRef.current = null
       setChallenge(null)
       setChallengeElapsed(0)
+      setQuestion(null)
       phaseRef.current = 'idle'
       setFigure(loadedFigure)
       setCursor(centre)
       setCurrentRegion(null)
       setPhase('idle')
       announce(
-        `${loadedFigure.title}. ${loadedFigure.regions.length} parts. Press Enter to start. Left and right pan the sound; low pitch is at the bottom and high pitch is at the top. A soft thunk marks region edges. Press F to start a find-it challenge. Tab selects the next part; Shift+Tab selects the previous. Press question mark for help.`,
+        `${loadedFigure.title}. ${loadedFigure.regions.length} parts. Press Enter to start. Left and right pan the sound; low pitch is at the bottom and high pitch is at the top. A soft thunk marks region edges. Press F to start a find-it challenge, or A to ask a question. Tab selects the next part; Shift+Tab selects the previous. Press question mark for help.`,
         prefs,
       )
     }).catch((error: unknown) => {
@@ -118,6 +136,70 @@ export function useExplorer({
       setChallenge(next)
       startChallengeClock()
     }
+
+    const closeQuestion = () => {
+      if (phaseRef.current !== 'asking') return
+      questionRun++
+      questionController?.abort()
+      questionController = undefined
+      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+      setQuestion(null)
+      phaseRef.current = questionReturnPhase
+      setPhase(questionReturnPhase)
+      if (questionReturnPhase === 'keyboard') resumeFindIt()
+      stageElement?.focus()
+      announce(questionReturnPhase === 'paused'
+        ? 'Question closed. Press Enter to continue exploring.'
+        : 'Question closed.', prefsRef.current)
+    }
+
+    const answerQuestion = async (value: string, run: number, currentFigure: Figure, region: Region | null) => {
+      const questionText = value.trim()
+      if (!questionText) return
+      setQuestion({ status: 'thinking', question: questionText })
+      if (document.pointerLockElement === stageElement) document.exitPointerLock()
+      await announce('Thinking…', prefsRef.current)
+      if (!active || run !== questionRun) return
+      const answer = await askQuestion(currentFigure, region, questionText)
+      if (!active || run !== questionRun) return
+      setQuestion({ status: 'answer', question: questionText, answer })
+      await announce(answer, prefsRef.current)
+    }
+
+    const startQuestion = (currentFigure: Figure) => {
+      const run = ++questionRun
+      questionFigure = currentFigure
+      questionRegion = regionRef.current
+      questionReturnPhase = document.pointerLockElement === stageElement ? 'paused' : 'keyboard'
+      pauseFindIt()
+      phaseRef.current = 'asking'
+      setPhase('asking')
+      setQuestion({ status: 'listening' })
+      void (async () => {
+        await announce('Ask your question.', prefsRef.current)
+        if (!active || run !== questionRun) return
+        const controller = new AbortController()
+        questionController = controller
+        const transcript = await listenOnce(controller.signal)
+        if (questionController === controller) questionController = undefined
+        if (!active || run !== questionRun) return
+        if (!transcript) {
+          setQuestion({ status: 'input', value: '' })
+          if (document.pointerLockElement === stageElement) document.exitPointerLock()
+          return
+        }
+        void answerQuestion(transcript, run, currentFigure, questionRegion)
+      })()
+    }
+
+    submitQuestionRef.current = (value) => {
+      if (!questionFigure || phaseRef.current !== 'asking') return
+      void answerQuestion(value, questionRun, questionFigure, questionRegion)
+    }
+    updateQuestionRef.current = (value) => {
+      setQuestion((current) => current?.status === 'input' ? { ...current, value } : current)
+    }
+    closeQuestionRef.current = closeQuestion
 
     const completeFindIt = (region: Region | null, currentFigure: Figure) => {
       if (!region || challengeRef.current?.status !== 'active' || challengeRef.current.targetRegionId !== region.id) return
@@ -183,7 +265,7 @@ export function useExplorer({
     const reportLockFailure = () => {
       if (!lockPending.current) return
       lockPending.current = false
-      const message = 'Pointer control is unavailable. Keyboard mode: use arrow keys to move, Tab or Shift+Tab to choose a part, and F for find-it. Press question mark for help.'
+      const message = 'Pointer control is unavailable. Keyboard mode: use arrow keys to move, Tab or Shift+Tab to choose a part, F for find-it, and A to ask a question. Press question mark for help.'
       resumeFindIt()
       phaseRef.current = 'keyboard'
       setPhase('keyboard')
@@ -251,6 +333,13 @@ export function useExplorer({
         event.stopPropagation()
         return
       }
+      if (phaseRef.current === 'asking') {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          closeQuestion()
+        }
+        return
+      }
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLButtonElement || event.target instanceof HTMLAnchorElement) return
       const stage = stageRef.current
       const currentFigure = figureRef.current
@@ -291,10 +380,16 @@ export function useExplorer({
       if (!currentFigure) return
       if (event.key === '?' && currentPhase !== 'idle' && currentPhase !== 'loading') {
         event.preventDefault()
-        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. F starts a find-it challenge. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
+        announce('Arrow keys move the cursor. Stereo position runs left to right; pitch runs low at the bottom to high at the top. A soft thunk marks region edges. F starts a find-it challenge. A asks a question. Tab and Shift+Tab select parts. Space gives the explanation. W gives the location. C returns to the centre. Q toggles the position tone. T tests it. S toggles screen reader announcements. Plus or minus changes speech rate. Escape pauses.', prefsRef.current)
         return
       }
       if (!active) return
+
+      if ((currentPhase === 'exploring' || currentPhase === 'keyboard') && key === 'a') {
+        event.preventDefault()
+        startQuestion(currentFigure)
+        return
+      }
 
       if ((currentPhase === 'exploring' || currentPhase === 'keyboard') && key === 'f') {
         event.preventDefault()
@@ -391,11 +486,21 @@ export function useExplorer({
       document.removeEventListener('pointerlockerror', reportLockFailure)
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('pointermove', onPointerMove)
+      questionRun++
+      questionController?.abort()
+      submitQuestionRef.current = () => {}
+      updateQuestionRef.current = () => {}
+      closeQuestionRef.current = () => {}
       if (stageElement && document.pointerLockElement === stageElement) document.exitPointerLock()
       stopChallengeClock()
       dispose()
     }
   }, [figureId, studentId, target, stageRef, figureAreaRef])
 
-  return { figure, phase, cursor, currentRegion, challenge, challengeElapsed, loadError, lockError }
+  return {
+    figure, phase, cursor, currentRegion, challenge, challengeElapsed, question, loadError, lockError,
+    submitQuestion: (value: string) => submitQuestionRef.current(value),
+    updateQuestion: (value: string) => updateQuestionRef.current(value),
+    closeQuestion: () => closeQuestionRef.current(),
+  }
 }

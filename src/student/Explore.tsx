@@ -8,7 +8,7 @@ import { useExplorer } from './useExplorer.ts'
 export default function Explore(props: { figureId: string; studentId: string; target?: string }) {
   const stageRef = useRef<HTMLElement>(null)
   const figureAreaRef = useRef<HTMLDivElement>(null)
-  const { figure, phase, cursor, currentRegion, challenge, challengeElapsed, loadError, lockError } = useExplorer({
+  const { figure, phase, cursor, currentRegion, challenge, challengeElapsed, question, submitQuestion, updateQuestion, closeQuestion, loadError, lockError } = useExplorer({
     figureId: props.figureId,
     studentId: props.studentId,
     target: props.target,
@@ -23,12 +23,12 @@ export default function Explore(props: { figureId: string; studentId: string; ta
   return (
     <main
       ref={stageRef}
-      tabIndex={0}
+      tabIndex={question ? -1 : 0}
       aria-label={figure ? `${figure.title} explorer` : 'Diagram explorer'}
-      className="relative isolate h-dvh w-screen overflow-hidden bg-stage font-sans text-white"
+      className={`relative isolate h-dvh w-screen overflow-hidden bg-stage font-sans text-white ${question?.status === 'thinking' ? 'question-thinking' : ''}`}
     >
       {figure && (
-        <div ref={figureAreaRef} className="pointer-events-none absolute inset-x-0 top-0 bottom-20">
+        <div ref={figureAreaRef} inert={question !== null} className="pointer-events-none absolute inset-x-0 top-0 bottom-20">
           <img
             src={figure.image}
             alt=""
@@ -105,7 +105,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
         </div>
       )}
 
-      <header inert={phase === 'orienting'} className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
+      <header inert={phase === 'orienting' || question !== null} className="absolute inset-x-0 top-0 z-30 flex items-center justify-between px-6 py-5 text-sm">
         <a className="underline-offset-4 hover:underline" href={href.home()}>
           Back to home
         </a>
@@ -113,7 +113,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
       </header>
 
       {challenge && challenge.status !== 'orienting' && (
-        <div className="pointer-events-none absolute inset-x-0 top-12 z-40 text-center text-white" aria-live="off">
+        <div inert={question !== null} className="pointer-events-none absolute inset-x-0 top-12 z-40 text-center text-white" aria-live="off">
           <p className="font-mono text-sm uppercase tracking-widest text-white/70">
             {challenge.status === 'paused' ? 'Paused · find the' : challenge.status === 'found' ? 'Found' : 'Find the'} {challengeTarget?.label ?? challenge.targetRegionId}
           </p>
@@ -160,7 +160,7 @@ export default function Explore(props: { figureId: string; studentId: string; ta
 
       {(phase === 'keyboard' || phase === 'exploring') && (
         <p role="status" className="absolute inset-x-4 bottom-3 z-10 mx-auto w-fit max-w-[calc(100vw-2rem)] rounded bg-black/75 px-4 py-2 text-center text-xs text-white">
-          <span className="block">{phase === 'keyboard' ? 'Arrows move · Tab parts · F find-it · Space explain · W location · Q tone off · Esc pause · ? help' : 'Trackpad moves · F find-it · ? controls'}</span>
+          <span className="block">{phase === 'keyboard' ? 'Arrows move · Tab parts · F find-it · A ask · Space explain · W location · Q tone off · Esc pause · ? help' : 'Trackpad moves · F find-it · A ask · ? controls'}</span>
           <span className="block">Sound: left/right stereo · low bottom, high top · soft thunk at region edges</span>
         </p>
       )}
@@ -182,6 +182,75 @@ export default function Explore(props: { figureId: string; studentId: string; ta
             {lockError && <p role="alert" className="mt-4 text-sm">{lockError}</p>}
           </div>
         </section>
+      )}
+
+      {question && (
+        <>
+          <div aria-hidden="true" className="absolute inset-0 z-40 bg-black/50" />
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="question-title"
+            className="absolute inset-x-0 bottom-0 z-50 mx-auto max-h-[82dvh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-paper px-6 pb-8 pt-5 text-ink shadow-2xl sm:bottom-6 sm:rounded-2xl"
+          >
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">TouchSight · ask</p>
+                <h2 id="question-title" className="mt-2 font-serif text-3xl">
+                  {question.status === 'answer' ? 'Here’s what I found' : currentRegion ? `Ask about ${currentRegion.label}` : 'Ask about this diagram'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                autoFocus={question.status !== 'input'}
+                onClick={closeQuestion}
+                className="rounded border border-line px-3 py-2 text-sm hover:bg-black/5"
+              >
+                Close <span className="text-muted">· Esc</span>
+              </button>
+            </div>
+
+            {question.status === 'listening' && (
+              <p className="mt-6 rounded-lg border border-line bg-white px-4 py-4 text-base text-muted">Listening for your question…</p>
+            )}
+            {question.status === 'input' && (
+              <form
+                className="mt-6"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  submitQuestion(question.value)
+                }}
+              >
+                <label htmlFor="question-input" className="mb-2 block text-sm font-medium">Your question</label>
+                <input
+                  id="question-input"
+                  autoFocus
+                  value={question.value}
+                  onChange={(event) => updateQuestion(event.currentTarget.value)}
+                  placeholder="What does it do?"
+                  className="w-full rounded-lg border border-line bg-white px-4 py-3 text-base outline-offset-2"
+                />
+                <p className="mt-2 text-sm text-muted">Speech input didn’t start, so you can type instead. Press Enter to ask.</p>
+                <button type="submit" disabled={!question.value.trim()} className="mt-5 rounded-lg bg-ink px-5 py-3 text-sm font-medium text-white disabled:opacity-40">
+                  Ask question
+                </button>
+              </form>
+            )}
+            {question.status === 'thinking' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p className="text-sm text-muted">Thinking…</p>
+                <p className="mt-2">“{question.question}”</p>
+              </div>
+            )}
+            {question.status === 'answer' && (
+              <div className="mt-6 rounded-lg border border-line bg-white px-4 py-4">
+                <p className="text-sm text-muted">“{question.question}”</p>
+                <p className="mt-3 text-lg leading-relaxed">{question.answer}</p>
+              </div>
+            )}
+            <p className="mt-5 text-xs text-muted">The diagram stays still while you ask. Close with Escape to return to the diagram.</p>
+          </section>
+        </>
       )}
     </main>
   )
