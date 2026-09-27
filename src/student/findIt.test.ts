@@ -22,6 +22,10 @@ describe('pickTarget', () => {
     expect(pickTarget(regions, 'animal-cell', undefined, 'current')).toBe(regions[1])
   })
 
+  it('avoids starting a repeat round on its target', () => {
+    expect(pickTarget(regions, 'animal-cell', undefined, 'mitochondrion', () => 0)).toBe(regions[0])
+  })
+
   it('chooses another region for other figures', () => {
     expect(pickTarget(regions, 'canada', undefined, 'current', () => 0)).toBe(regions[1])
   })

@@ -275,7 +275,7 @@ export function useExplorer({
     }
 
     const startFindIt = async (currentFigure: Figure) => {
-      const targetRegion = pickTarget(currentFigure.regions, currentFigure.id, target, regionRef.current?.id ?? null)
+      const targetRegion = pickTarget(currentFigure.regions, currentFigure.id, challengeRef.current ? undefined : target, regionRef.current?.id ?? null)
       if (!targetRegion) {
         announce('This diagram has no parts to find.', prefsRef.current)
         return

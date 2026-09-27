@@ -18,7 +18,7 @@ export function pickTarget(
   if (requested) return requested
 
   const defaultTarget = figureId === 'animal-cell' && regions.find(({ id }) => id === 'mitochondrion')
-  if (defaultTarget) return defaultTarget
+  if (defaultTarget && defaultTarget.id !== currentRegionId) return defaultTarget
 
   const candidates = regions.filter(({ id }) => id !== currentRegionId)
   const pool = candidates.length ? candidates : regions
