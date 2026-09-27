@@ -29,3 +29,4 @@ public/models/
 # Local env / secrets
 .env
 .env.*
+.worktrees/
