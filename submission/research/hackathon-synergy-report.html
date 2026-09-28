@@ -1,0 +1,527 @@
+<title>Hackathon Synergy Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F5F1; --surface:#FFFFFF; --surface-2:#ECEEE8; --ink:#152028; --muted:#56646C; --line:#D8DDD5;
+  --accent:#0B6E69; --accent-ink:#FFFFFF; --accent-soft:#D3EBE8; --mark:#F4DA5C; --mark-ink:#152028;
+  --good:#2C7A4B; --bad:#B0412D; --warn:#9A6A00;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1519; --surface:#162026; --surface-2:#1C282F; --ink:#E5EBE8; --muted:#98A6AC; --line:#2A373E;
+    --accent:#4DC2B6; --accent-ink:#0F1519; --accent-soft:#16393A; --mark:#E9CF4F; --mark-ink:#10171B;
+    --good:#6BC590; --bad:#E27B64; --warn:#E0B34A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1519; --surface:#162026; --surface-2:#1C282F; --ink:#E5EBE8; --muted:#98A6AC; --line:#2A373E;
+  --accent:#4DC2B6; --accent-ink:#0F1519; --accent-soft:#16393A; --mark:#E9CF4F; --mark-ink:#10171B;
+  --good:#6BC590; --bad:#E27B64; --warn:#E0B34A;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1040px;margin-inline:auto}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,5.4vw,3.9rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.55rem,3vw,2.1rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0;max-width:68ch}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+mark{background:var(--mark);color:var(--mark-ink);padding:0 .2em;border-radius:2px}
+
+/* header */
+header.top{padding-block:48px 28px;display:grid;gap:20px;border-bottom:1px solid var(--line)}
+.lede{font-size:1.15rem;color:var(--muted)}
+.verdict{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.verdict h1 span{color:var(--accent)}
+
+/* funnel */
+.funnel{display:grid;gap:6px;margin-top:8px}
+.frow{display:grid;grid-template-columns:minmax(0,1fr) 3.5rem;gap:12px;align-items:center}
+.fbar{height:30px;background:var(--accent-soft);border-radius:3px;display:flex;align-items:center;padding-inline:10px;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fbar.last{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.fnum{font-family:var(--mono);font-size:1rem;text-align:right}
+
+section{padding-block:44px 8px;display:grid;gap:18px}
+.stage{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.stage .n{font-family:var(--mono);font-size:.8rem;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 7px}
+
+/* tables */
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.cluster{font-family:var(--mono);font-size:.72rem;padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+
+/* synergy rubric */
+.defn{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:18px 20px;border-radius:4px;display:grid;gap:10px}
+.defn p.q{font-size:1.08rem}
+.tests{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.test{border:1px solid var(--line);border-radius:4px;padding:12px;background:var(--surface);display:grid;gap:4px;align-content:start}
+.test b{font-family:var(--display);font-size:1.02rem}
+.test .pts{font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+.test p{font-size:.88rem;color:var(--muted)}
+
+/* matrix tool */
+.controls{display:grid;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px}
+.presets,.toggle{display:flex;flex-wrap:wrap;gap:8px}
+button.chip{font:500 .85rem var(--body);border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.slider{display:grid;gap:4px}
+.slider label{display:flex;justify-content:space-between;font-size:.9rem;font-weight:500}
+.slider output{font-family:var(--mono);color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.rank{display:grid;gap:4px}
+.rrow{display:grid;grid-template-columns:2rem minmax(0,11rem) minmax(0,1fr) 3.4rem;gap:10px;align-items:center;padding:7px 10px;border-radius:4px;background:var(--surface);border:1px solid var(--line)}
+.rrow.top{border-color:var(--accent)}
+.rrow .pos{font-family:var(--mono);color:var(--muted)}
+.rrow.top .pos{color:var(--accent);font-weight:600}
+.rrow .name{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .fpf{font-family:var(--mono);font-size:.75rem;color:var(--muted);display:block;font-weight:400}
+.track{height:12px;background:var(--surface-2);border-radius:2px;position:relative;overflow:hidden}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--accent-soft);border-right:2px solid var(--accent)}
+.rrow.top .fill{background:var(--accent)}
+.score{font-family:var(--mono);text-align:right}
+.note{font-size:.88rem;color:var(--muted)}
+
+/* delta list */
+.deltas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.delta{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:12px 14px;display:grid;gap:4px}
+.delta .mv{font-family:var(--mono);font-size:.85rem}
+.up{color:var(--good)} .down{color:var(--bad)}
+
+/* top 3 */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{font:600 .95rem var(--display);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:4px;padding:8px 14px;cursor:pointer;display:flex;gap:8px;align-items:baseline}
+.tab .mono{font-size:.75rem;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab[aria-selected="true"] .mono{color:var(--bg);opacity:.75}
+.pick{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;display:grid;gap:20px}
+.pick .pitch{font-family:var(--display);font-size:clamp(1.15rem,2.4vw,1.45rem);font-weight:600;line-height:1.3;max-width:52ch}
+.parents{display:flex;flex-wrap:wrap;gap:6px}
+.parents span{font-family:var(--mono);font-size:.78rem;border:1px dashed var(--line);border-radius:3px;padding:2px 8px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+.cols ol,.cols ul{margin:6px 0 0;padding-left:1.2em;display:grid;gap:6px;font-size:.95rem}
+.demo{display:grid;gap:0;border-left:2px solid var(--line);margin-top:6px}
+.beat{display:grid;grid-template-columns:5.4rem 1fr;gap:10px;padding:6px 0 6px 12px;font-size:.93rem;position:relative}
+.beat::before{content:"";position:absolute;left:-5px;top:14px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.beat .t{font-family:var(--mono);font-size:.78rem;color:var(--muted);padding-top:2px}
+.callout{background:var(--surface-2);border-radius:4px;padding:12px 14px;font-size:.93rem;display:grid;gap:4px}
+.callout b{font-family:var(--display)}
+
+/* skills */
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px;display:grid;gap:8px;align-content:start}
+.phase .hrs{font-family:var(--mono);font-size:.75rem;color:var(--accent)}
+.phase ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.phase li{font-size:.9rem;line-height:1.4}
+.phase li code{font-family:var(--mono);font-size:.84rem;font-weight:500}
+.phase li small{display:block;color:var(--muted);font-size:.8rem}
+.badge{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:0 5px;border-radius:2px;margin-left:4px;vertical-align:1px}
+.b-off{background:var(--accent-soft);color:var(--accent)}
+.b-have{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.b-own{background:var(--mark);color:var(--mark-ink)}
+pre{margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:14px;overflow-x:auto;font:.82rem/1.55 var(--mono)}
+.copyrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button.copy{font:500 .82rem var(--body);border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:4px;padding:4px 10px;cursor:pointer}
+
+.caveats{display:grid;gap:8px;padding-left:1.1em;margin:0;font-size:.94rem}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted);display:grid;gap:6px}
+@media (max-width:560px){
+  .rrow{grid-template-columns:1.6rem minmax(0,1fr) 3rem}
+  .rrow .track{grid-column:2 / 4;grid-row:2}
+  .beat{grid-template-columns:4.4rem 1fr}
+}
+@media (prefers-reduced-motion:no-preference){ .fill{transition:width .35s ease} }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">Research brief · 25 Sep 2026 · 15 hackathons, 120 winning projects</div>
+  <div class="verdict"><h1>If the theme is unknown, build <span>TouchSight</span>.</h1></div>
+  <p class="lede">We took the top 8 winners from 15 big hackathons held in 2025–2026, fused compatible winners into new ideas, scored them for a 48-hour vibe-coded build with no paid APIs, and had a second judge challenge the ranking. Three ideas survived every weighting we tried.</p>
+  <div class="funnel" aria-label="Selection funnel">
+    <div class="frow"><div class="fbar" style="width:100%">Winning projects researched</div><div class="fnum">120</div></div>
+    <div class="frow"><div class="fbar" style="width:62%">Two- and three-project fusions proposed</div><div class="fnum">30</div></div>
+    <div class="frow"><div class="fbar" style="width:54%">Passed the synergy gate (score ≥ 6)</div><div class="fnum">23</div></div>
+    <div class="frow"><div class="fbar" style="width:44%">Buildable at $0 in 48 hours</div><div class="fnum">20</div></div>
+    <div class="frow"><div class="fbar" style="width:34%">Scored in the decision matrix</div><div class="fnum">14</div></div>
+    <div class="frow"><div class="fbar" style="width:24%">Re-judged with market checks</div><div class="fnum">9</div></div>
+    <div class="frow"><div class="fbar last" style="width:14%">Final picks</div><div class="fnum">3</div></div>
+  </div>
+</header>
+
+<section id="sources">
+  <div class="stage"><span class="n">Stage 1</span><h2>The 15 hackathons</h2></div>
+  <p>Three research agents each covered one cluster and pulled 8 winners per event from Devpost galleries, official recaps and project pages. Two planned events were swapped: HackMIT 2025 never published its winners, and the Google ADK Hackathon was the smallest of its group.</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Event</th><th>When</th><th class="r">Size</th><th>Cluster</th></tr></thead>
+      <tbody>
+        <tr><td>Bolt.new World's Largest Hackathon</td><td>May–Jun 2025</td><td class="r num">~130,000 registered</td><td><span class="cluster">Online AI</span></td></tr>
+        <tr><td>NASA Space Apps Challenge</td><td>Oct 2025</td><td class="r num">114,000+ · 11,500 projects</td><td><span class="cluster">Online AI</span></td></tr>
+        <tr><td>Gemini 3 Hackathon (Google DeepMind)</td><td>Dec 2025–Feb 2026</td><td class="r num">35,522 · 4,500+ projects</td><td><span class="cluster">Online AI</span></td></tr>
+        <tr><td>Microsoft AI Agents Hackathon</td><td>Apr 2025</td><td class="r num">18,000+ · 570 projects</td><td><span class="cluster">Online AI</span></td></tr>
+        <tr><td>Colosseum Solana Cypherpunk</td><td>Sep–Oct 2025</td><td class="r num">9,000+ · 1,576 projects</td><td><span class="cluster">Web3</span></td></tr>
+        <tr><td>GitLab AI Hackathon</td><td>Feb–Mar 2026</td><td class="r num">~7,000 · 600+ agents</td><td><span class="cluster">Industry</span></td></tr>
+        <tr><td>Cal Hacks 12.0</td><td>Oct 2025</td><td class="r num">2,162 · 699 projects</td><td><span class="cluster">University</span></td></tr>
+        <tr><td>ETHGlobal Cannes</td><td>Jul 2025</td><td class="r num">~1,500 · 334 projects</td><td><span class="cluster">Web3</span></td></tr>
+        <tr><td>TreeHacks 2026 (Stanford)</td><td>Feb 2026</td><td class="r num">1,096 · 378 projects</td><td><span class="cluster">University</span></td></tr>
+        <tr><td>LA Hacks 2026 <small class="note">(replaces HackMIT)</small></td><td>Apr 2026</td><td class="r num">974 · 307 projects</td><td><span class="cluster">University</span></td></tr>
+        <tr><td>Hack the North</td><td>Sep 2025</td><td class="r num">872 · 261 projects</td><td><span class="cluster">University</span></td></tr>
+        <tr><td>Kaggle Gemma 3n Impact Challenge</td><td>2025</td><td class="r num">600+ projects</td><td><span class="cluster">Online AI</span></td></tr>
+        <tr><td>Anthropic "Built with Opus 4.7"</td><td>Apr 2026</td><td class="r num">500 builders · 288 projects</td><td><span class="cluster">Industry</span></td></tr>
+        <tr><td>ETHDenver BUIDLathon</td><td>Feb 2026</td><td class="r num">186 projects</td><td><span class="cluster">Web3</span></td></tr>
+        <tr><td>PennApps XXVI</td><td>Sep 2025</td><td class="r num">85 projects</td><td><span class="cluster">University</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Sizes are the organisers' or Devpost's own counts. Registered users and people who actually attended can differ a lot.</p>
+</section>
+
+<section id="synergy">
+  <div class="stage"><span class="n">Stage 2</span><h2>What counts as synergy</h2></div>
+  <div class="defn">
+    <div class="eyebrow">Working definition</div>
+    <p class="q">Two or three proven winners, each supplying a capability the others lack, that together give <strong>one user</strong> with <strong>one problem</strong> an outcome none of them could deliver alone, joined through a single clean interface.</p>
+    <p class="note">The test sentence: "Only the combination lets &lt;user&gt; do X, because A provides P1, which B needs in order to do P2." If the honest sentence is "A, plus a feature from B", it is not synergy and it is discarded.</p>
+  </div>
+  <div class="tests">
+    <div class="test"><span class="pts">0–2 pts</span><b>Complementarity</b><p>Each parent fills a different slot: sensing, reasoning, or action and trust.</p></div>
+    <div class="test"><span class="pts">0–3 pts</span><b>Emergence</b><p>A new user outcome. Scoring zero here caps the total at 5, which fails the gate.</p></div>
+    <div class="test"><span class="pts">0–2 pts</span><b>One story</b><p>One named user and one flow that fits a 3-minute demo.</p></div>
+    <div class="test"><span class="pts">0–2 pts</span><b>Clean joint</b><p>The parts meet at one schema, event stream or shared object.</p></div>
+    <div class="test"><span class="pts">0–1 pt</span><b>Double validation</b><p>Parents come from at least two different events.</p></div>
+  </div>
+  <p class="note">Seven fusions failed the gate. Most of them stacked three projects that did the same job (three agent-memory projects, three screen agents). Three more passed but were cut for cost or demo risk: a hardware protocol decoder needed frontier-model reasoning, paper replication needed a paid model, and blind navigation needed a physical walk through the venue.</p>
+</section>
+
+<section id="matrix">
+  <div class="stage"><span class="n">Stage 3</span><h2>The decision matrix</h2></div>
+  <p>Each contender is scored 1–10 on <strong>Hackathon fit</strong> (matches what judges rewarded, playable live), <strong>Idea power</strong> (problem size, novelty against existing products, use after the event) and <strong>Vibe-coding feasibility</strong> (1–3 people, 48 hours, standard web stack, $0 runtime, reliable demo). Move the weights to see how stable the ranking is.</p>
+  <div class="controls">
+    <div class="toggle" role="group" aria-label="Score source">
+      <button class="chip" id="src-judge" aria-pressed="true" type="button">Judge's re-scores</button>
+      <button class="chip" id="src-analyst" aria-pressed="false" type="button">Analyst's first scores</button>
+    </div>
+    <div class="presets" role="group" aria-label="Weight presets">
+      <button class="chip" data-w="30,30,40" type="button">Default 30/30/40</button>
+      <button class="chip" data-w="33,33,34" type="button">Equal</button>
+      <button class="chip" data-w="25,45,30" type="button">Power-heavy</button>
+      <button class="chip" data-w="20,20,60" type="button">Feasibility-heavy</button>
+    </div>
+    <div class="sliders">
+      <div class="slider"><label for="w-fit">Hackathon fit <output id="o-fit" class="num">30%</output></label><input type="range" id="w-fit" min="0" max="100" value="30"></div>
+      <div class="slider"><label for="w-pow">Idea power <output id="o-pow" class="num">30%</output></label><input type="range" id="w-pow" min="0" max="100" value="30"></div>
+      <div class="slider"><label for="w-fea">Feasibility <output id="o-fea" class="num">40%</output></label><input type="range" id="w-fea" min="0" max="100" value="40"></div>
+    </div>
+  </div>
+  <div class="rank" id="rank" aria-live="polite"></div>
+  <p class="note">Weights are normalised to 100%. Ties break on feasibility, then idea power, which is the rule the analyst set before scoring. Figures under each name are fit / power / feasibility.</p>
+
+  <h3>Where the judge overruled the analyst</h3>
+  <div class="deltas">
+    <div class="delta"><b>Understudy</b><span class="mv down num">7.6 → 6.3 · #1 → #7</span><p class="note">Yoodli and at least four other products already sell role-play with body-language feedback. Its live voice loop (mic, speech-to-text, model, voice, camera) is also the most fragile demo, with 2–8 second turns.</p></div>
+    <div class="delta"><b>Receipts</b><span class="mv up num">6.8 → 7.2 · #9 → #3</span><p class="note">Limited to five curated datasets with a closed list of options, the hard part becomes a bounded query problem. "Out of scope" turns into a visible anti-hallucination feature.</p></div>
+    <div class="delta"><b>LeaseLint, ScamSense</b><span class="mv down num">Power −2 each</span><p class="note">At least seven live lease checkers and five scam-detection apps exist, one of them already marketed as "self-learning".</p></div>
+  </div>
+</section>
+
+<section id="top3">
+  <div class="stage"><span class="n">Stage 4</span><h2>The top three</h2></div>
+  <div class="tabs" role="tablist" aria-label="Top three ideas">
+    <button class="tab" role="tab" id="t-1" aria-controls="p-1" aria-selected="true" type="button"><span class="mono">#1</span>TouchSight</button>
+    <button class="tab" role="tab" id="t-2" aria-controls="p-2" aria-selected="false" type="button"><span class="mono">#2</span>Say-It-Play-It</button>
+    <button class="tab" role="tab" id="t-3" aria-controls="p-3" aria-selected="false" type="button"><span class="mono">#3</span>Receipts</button>
+  </div>
+
+  <article class="pick" role="tabpanel" id="p-1" aria-labelledby="t-1">
+    <div style="display:grid;gap:10px">
+      <div class="eyebrow">Score 7.3 · fit 8 · power 7 · feasibility 7</div>
+      <p class="pitch">Turns any textbook diagram into something a blind student can explore with a fingertip in 60 seconds, with no embosser, no sighted helper and no internet.</p>
+      <div class="parents"><span>Dots · LA Hacks 2026</span><span>ROSS · Hack the North</span><span>Gemma Vision · Gemma 3n 1st</span></div>
+    </div>
+    <div class="cols">
+      <div><h3>Why it wins</h3><ol>
+        <li>Accessibility with a named user is the most consistent winner across all 15 events: the whole Gemma 3n podium, Netra, Dots, ROSS and most "Most Impactful" awards.</li>
+        <li>The AI runs once per image, before the demo. The live part is finger-to-sound hit-testing, so it cannot hang on stage.</li>
+        <li>Every build chunk is standard work: a Transformers.js recipe, a canvas editor, Web Audio and SVG export.</li>
+        <li>Offline and private is a selling point here, because schools have student-data rules.</li>
+      </ol></div>
+      <div><h3>3-minute demo</h3><div class="demo">
+        <div class="beat"><span class="t">0:00–0:25</span><span>Hand-made tactile graphics take specialists weeks, so blind students fall behind in STEM.</span></div>
+        <div class="beat"><span class="t">0:25–1:00</span><span>A teacher photographs a cell diagram. Regions appear; the teacher fixes two in 10 seconds.</span></div>
+        <div class="beat"><span class="t">1:00–2:00</span><span>A blindfolded judge finds the mitochondria alone, guided by edge ticks and spoken labels. Time it on screen.</span></div>
+        <div class="beat"><span class="t">2:00–2:30</span><span>Airplane mode on, still works. Show the swell-paper export and QR code.</span></div>
+        <div class="beat"><span class="t">2:30–3:00</span><span>Architecture slide: models in the browser, $0 per student.</span></div>
+      </div></div>
+    </div>
+    <div class="cols">
+      <div class="callout"><b>Beats Say-It-Play-It because</b><span>They tie at 7.3, and TouchSight wins the tie-break on idea power. It removes a real cost (hand-made tactile graphics) where #2 is mainly delight, so it scores higher on rubrics that weight impact.</span></div>
+      <div class="callout"><b>Biggest risk</b><span>Region labels on dense diagrams. Make the teacher's 10-second correction a feature, pre-test 3–4 figures, and get one quote from a teacher of the visually impaired before the event.</span></div>
+    </div>
+  </article>
+
+  <article class="pick" role="tabpanel" id="p-2" aria-labelledby="t-2" hidden>
+    <div style="display:grid;gap:10px">
+      <div class="eyebrow">Score 7.3 · fit 9 · power 6 · feasibility 7</div>
+      <p class="pitch">Describe any movement game in one sentence and play it with your whole body 20 seconds later. A local model writes it once; play makes zero AI calls.</p>
+      <div class="parents"><span>kinemo · PennApps 1st overall</span><span>ChainCraft · ETHDenver 2026</span><span>OmniBridge · Opus 4.7 finalist</span></div>
+    </div>
+    <div class="cols">
+      <div><h3>Why it wins</h3><ol>
+        <li>The strongest judge-plays-it moment in the set. kinemo won 1st overall because judges could play it.</li>
+        <li>"Model once, deterministic forever" won at three events. It gives a concrete engineering claim: 0 inference calls during play.</li>
+        <li>The most novel of the nine. No text-to-game tool uses body control, and no body-game tool accepts free text.</li>
+        <li>Ollama's schema-constrained output makes every compiled game valid, and it can be pitched for games, PE, physio or kids.</li>
+      </ol></div>
+      <div><h3>3-minute demo</h3><div class="demo">
+        <div class="beat"><span class="t">0:00–0:20</span><span>Motion games need a studio. Physios and PE teachers need custom ones every day.</span></div>
+        <div class="beat"><span class="t">0:20–0:50</span><span>Type "dodge falling tacos by squatting, clap to shoot the pigeons". The game appears.</span></div>
+        <div class="beat"><span class="t">0:50–1:30</span><span>A teammate plays while a counter reads "AI calls during play: 0".</span></div>
+        <div class="beat"><span class="t">1:30–2:20</span><span>A judge names a game; it compiles live and they play it.</span></div>
+        <div class="beat"><span class="t">2:20–3:00</span><span>Remix one word, share by QR, then show the architecture.</span></div>
+      </div></div>
+    </div>
+    <div class="cols">
+      <div class="callout"><b>Beats Receipts because</b><span>Once a game compiles, nothing can fail on stage. Receipts depends on speech recognition in a noisy room. It also scores higher on fit because the judge plays instead of watching.</span></div>
+      <div class="callout"><b>Biggest risk</b><span>A valid game that is boring, or a request outside the game language. Give every setting sane defaults, map unknown moves to the nearest supported one on screen, and keep 6 cached showcase games.</span></div>
+    </div>
+  </article>
+
+  <article class="pick" role="tabpanel" id="p-3" aria-labelledby="t-3" hidden>
+    <div style="display:grid;gap:10px">
+      <div class="eyebrow">Score 7.2 · fit 8 · power 8 · feasibility 6</div>
+      <p class="pitch">Listens to a debate and, for every number someone claims, pulls the actual government data and shows the chart. The verdict is computed, not guessed.</p>
+      <div class="parents"><span>No Cap · Cal Hacks 3rd overall</span><span>Orbital Assets · Gemini 3</span><span>OverSEA · PennApps 3rd</span></div>
+    </div>
+    <div class="cols">
+      <div><h3>Why it wins</h3><ol>
+        <li>The highest idea power in the set. Existing live fact-checkers (LiveFC, Factiverse, ClaimBuster) have a model judge retrieved text; Receipts calculates the answer from data.</li>
+        <li>It combines three patterns judges rewarded: plain math with the model only writing prose, checking against ground truth, and live real-time output.</li>
+        <li>It fixes the weak spot of a podium winner: No Cap's verdicts were asserted by a model and relied on paid search.</li>
+        <li>"Out of scope, no receipt" is honest and reads as a trust feature to judges.</li>
+      </ol></div>
+      <div><h3>3-minute demo</h3><div class="demo">
+        <div class="beat"><span class="t">0:00–0:20</span><span>Fact-checks arrive days late, and AI fact-checkers hallucinate too.</span></div>
+        <div class="beat"><span class="t">0:20–1:20</span><span>A mock debate clip plays; claims pop into a feed, each with a chart and verdict.</span></div>
+        <div class="beat"><span class="t">1:20–1:50</span><span>Open one receipt: parsed query, SQL, dataset link. "The model wrote this sentence, not the verdict."</span></div>
+        <div class="beat"><span class="t">1:50–2:30</span><span>A judge speaks a claim and gets a receipt in about 3 seconds, then an out-of-scope claim.</span></div>
+        <div class="beat"><span class="t">2:30–3:00</span><span>Speaker accuracy scoreboard, then the $0 architecture.</span></div>
+      </div></div>
+    </div>
+    <div class="cols">
+      <div class="callout"><b>Beats ClearPass (#4) because</b><span>The demo is live and interactive instead of a document upload. Its domain hasn't already won twice, and it has one hard integration instead of five subsystems.</span></div>
+      <div class="callout"><b>Biggest risk</b><span>A misparsed claim makes a "truth machine" look wrong. Show the parsed query before the verdict, use a push-to-talk mic, and make the pre-recorded clip the main input.</span></div>
+    </div>
+  </article>
+
+  <h3>Which one to build, by announced theme</h3>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Theme or track</th><th>Build</th><th>Backup</th></tr></thead>
+      <tbody>
+        <tr><td>Unknown, general, open innovation</td><td><mark>TouchSight</mark></td><td>Say-It-Play-It</td></tr>
+        <tr><td>Accessibility, social impact, AI for good</td><td>TouchSight</td><td>Receipts</td></tr>
+        <tr><td>Education</td><td>TouchSight (STEM diagrams)</td><td>Say-It-Play-It (PE)</td></tr>
+        <tr><td>Health, fitness, rehab</td><td>Say-It-Play-It (physio games)</td><td>TouchSight</td></tr>
+        <tr><td>Games, entertainment, creativity</td><td>Say-It-Play-It</td><td>Air Changes</td></tr>
+        <tr><td>Civic tech, journalism, open data</td><td>Receipts</td><td>ClearPass</td></tr>
+        <tr><td>Trustworthy or responsible AI</td><td>Receipts</td><td>Say-It-Play-It</td></tr>
+        <tr><td>On-device or edge-AI sponsor</td><td>TouchSight</td><td>Say-It-Play-It</td></tr>
+        <tr><td>Privacy, identity, web3, legal</td><td>ClearPass</td><td>ScamSense Family</td></tr>
+        <tr><td>Fintech, consumer protection</td><td>ScamSense Family</td><td>Receipts</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="stage"><span class="n">Stage 5</span><h2>Claude skills and a $0 stack</h2></div>
+  <p>Claude Code and its skills are only used while building. The app you ship never calls Claude or any other paid API. Every model is downloaded ahead of time, so the demo runs in airplane mode. One shared core covers all three ideas, so you can pick after the theme is announced.</p>
+  <div class="phases">
+    <div class="phase"><span class="hrs">Hours 0–4 · Plan</span><h3>Plan</h3><ul>
+      <li><code>superpowers</code><span class="badge b-off">marketplace</span><small>obra/superpowers: brainstorming, writing-plans, executing-plans</small></li>
+      <li><code>claude-md-management</code><span class="badge b-off">official</span><small>Keeps each teammate's CLAUDE.md in sync</small></li>
+      <li><code>skill-creator</code><span class="badge b-off">official</span><small>Writes the three custom skills below</small></li>
+    </ul></div>
+    <div class="phase"><span class="hrs">Hours 2–36 · Build</span><h3>Build</h3><ul>
+      <li><code>transformers-js</code><span class="badge b-off">Hugging Face</span><small>In-browser models, WebGPU with WASM fallback</small></li>
+      <li><code>frontend-design</code>, <code>typescript-lsp</code><span class="badge b-off">official</span></li>
+      <li><code>context7</code><span class="badge b-off">marketplace</span><small>Current library docs; no key needed, internet at build time only</small></li>
+      <li><code>pick-ui-library</code>, <code>prototype</code>, <code>mobile-native</code>, <code>minimalist-ui</code><span class="badge b-have">installed</span></li>
+    </ul></div>
+    <div class="phase"><span class="hrs">Hour 14 on · Test</span><h3>Test and debug</h3><ul>
+      <li><code>playwright</code><span class="badge b-off">Microsoft</span><small>Claude clicks through the demo path in a real browser</small></li>
+      <li><code>systematic-debugging</code>, <code>verification-before-completion</code><span class="badge b-off">superpowers</span></li>
+      <li><code>chrome-devtools-mcp</code><span class="badge b-off">optional</span><small>Frame-rate and WebGPU stalls</small></li>
+    </ul></div>
+    <div class="phase"><span class="hrs">Hours 34–46 · Polish</span><h3>Polish and pitch</h3><ul>
+      <li><code>code-simplifier</code><span class="badge b-off">official</span></li>
+      <li><code>emil-design-eng</code>, <code>animate</code>, <code>review-animations</code><span class="badge b-have">installed</span></li>
+      <li><code>pptx</code><span class="badge b-off">optional</span><small>Only if the event requires slides</small></li>
+    </ul></div>
+    <div class="phase"><span class="hrs">Week before · Write</span><h3>Custom skills</h3><ul>
+      <li><code>browser-ml-runtime</code><span class="badge b-own">yours</span><small>Loading models offline, warm-up, memory limits</small></li>
+      <li><code>local-llm-structured-json</code><span class="badge b-own">yours</span><small>Ollama with a JSON schema, one repair retry, cached fallback</small></li>
+      <li><code>pose-action-engine</code><span class="badge b-own">yours</span><small>MediaPipe squat, jump, clap and lean detection</small></li>
+    </ul></div>
+  </div>
+
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Layer</th><th>Shared core</th><th>TouchSight</th><th>Say-It-Play-It</th><th>Receipts</th></tr></thead>
+      <tbody>
+        <tr><td>App</td><td colspan="4">Vite + React + TypeScript, offline service worker, hosted free on GitHub Pages</td></tr>
+        <tr><td>Models</td><td>Transformers.js 4 in a Web Worker</td><td>Florence-2 (~223 MB) and SlimSAM (~14 MB)</td><td>MediaPipe pose lite (5.8 MB)</td><td>whisper-base (~77 MB) as the offline speech path</td></tr>
+        <tr><td>Local model</td><td>Ollama <span class="mono">qwen3:4b-instruct-2507</span> (2.5 GB)</td><td>Optional "what is this?" answers</td><td>Sentence → game file</td><td>Claim → data query</td></tr>
+        <tr><td>Output</td><td>Browser speech, kokoro-js voice</td><td>Web Audio edge ticks, SVG export</td><td>Canvas engine, Kenney CC0 assets</td><td>DuckDB-WASM, Observable Plot, US public-domain data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout"><b>Remove before the event</b><span>The installed <code>higgsfield</code> skill spends paid credits, and <code>imagegen-frontend-web</code>, <code>imagegen-frontend-mobile</code>, <code>image-to-code</code> and <code>brandkit</code> route through it. Delete them so nobody triggers them at 3 a.m.</span></div>
+
+  <div class="copyrow"><h3>Install block</h3><button class="copy" type="button" id="copy-btn">Copy commands</button></div>
+<pre id="install">/plugin install superpowers@claude-plugins-official
+/plugin install skill-creator@claude-plugins-official
+/plugin install claude-md-management@claude-plugins-official
+/plugin install frontend-design@claude-plugins-official
+/plugin install typescript-lsp@claude-plugins-official
+/plugin install playwright@claude-plugins-official
+/plugin install context7@claude-plugins-official
+/plugin install code-simplifier@claude-plugins-official
+
+npx skills add huggingface/skills --skill transformers-js -a claude-code -y
+ollama pull qwen3:4b-instruct-2507</pre>
+  <p class="note">Run the <span class="mono">/plugin</span> lines inside Claude Code and the others in a terminal. The full block, with model downloads and removal commands, is in <span class="mono">06-claude-skills-techstack.md</span>.</p>
+</section>
+
+<section id="caveats">
+  <h2>Before you rely on this</h2>
+  <ul class="caveats">
+    <li>All scores are agent judgment based on the research, not measurements. The top three held under default, equal and power-heavy weights; only an extreme feasibility weighting lets Air Changes and LeaseLint catch up.</li>
+    <li>"Biggest" was applied loosely. PennApps (85 projects) and ETHDenver (186) are much smaller than the online events, and were kept for variety and 2026 coverage.</li>
+    <li>Some details are thin. Several Gemma 3n and NASA project pages load only with JavaScript, so their tech stacks are partly unverified.</li>
+    <li>Florence-2 is not yet confirmed on Transformers.js v4. The plan is to test it five days before the event and pin v3 if it breaks.</li>
+    <li>For Receipts, Chrome's live speech recognition is free and keyless but sends audio to Google. The offline path is whisper-base in the browser.</li>
+    <li>Star counts reported for skill repos (for example ~292k for superpowers) came from the research agent and were not double-checked.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>Built from six research files: 01–03 hackathon research, 04 synergy and decision matrix, 05 top-three ranking, 06 skills and tech stack.</span>
+  <span>Compiled 25 September 2026.</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var DATA = [
+    {n:"TouchSight",        j:[8,7,7], a:[8,7,7]},
+    {n:"Say-It-Play-It",    j:[9,6,7], a:[9,7,6]},
+    {n:"Receipts",          j:[8,8,6], a:[8,8,5]},
+    {n:"ClearPass",         j:[7,7,6], a:[7,7,7]},
+    {n:"ScamSense Family",  j:[6,6,7], a:[6,8,7]},
+    {n:"HandVoice",         j:[7,5,7], a:[8,6,7]},
+    {n:"Understudy",        j:[7,6,6], a:[8,8,7]},
+    {n:"Air Changes",       j:[6,3,9], a:[7,4,9]},
+    {n:"LeaseLint",         j:[5,5,8], a:[6,7,8]}
+  ];
+  var src = "j";
+  var fit = document.getElementById("w-fit"), pow = document.getElementById("w-pow"), fea = document.getElementById("w-fea");
+  var oF = document.getElementById("o-fit"), oP = document.getElementById("o-pow"), oE = document.getElementById("o-fea");
+  var rank = document.getElementById("rank");
+  var presets = document.querySelectorAll("[data-w]");
+
+  function render(){
+    var w = [+fit.value, +pow.value, +fea.value];
+    var sum = w[0]+w[1]+w[2] || 1;
+    var nw = w.map(function(x){return x/sum;});
+    oF.textContent = Math.round(nw[0]*100)+"%"; oP.textContent = Math.round(nw[1]*100)+"%"; oE.textContent = Math.round(nw[2]*100)+"%";
+    var rows = DATA.map(function(d){
+      var s = d[src];
+      return {n:d.n, s:s, v:s[0]*nw[0]+s[1]*nw[1]+s[2]*nw[2]};
+    }).sort(function(a,b){
+      var dv = Math.round((b.v-a.v)*1000);
+      if (dv !== 0) return dv;
+      if (b.s[2] !== a.s[2]) return b.s[2]-a.s[2];
+      return b.s[1]-a.s[1];
+    });
+    rank.innerHTML = "";
+    rows.forEach(function(r,i){
+      var el = document.createElement("div");
+      el.className = "rrow" + (i < 3 ? " top" : "");
+      var pct = Math.max(0, Math.min(100, (r.v-3)/(9-3)*100));
+      el.innerHTML = '<span class="pos num">'+(i+1)+'</span>'+
+        '<span class="name">'+r.n+'<span class="fpf">'+r.s.join(" / ")+'</span></span>'+
+        '<span class="track" aria-hidden="true"><span class="fill" style="width:'+pct.toFixed(1)+'%"></span></span>'+
+        '<span class="score num">'+r.v.toFixed(2)+'</span>';
+      rank.appendChild(el);
+    });
+    presets.forEach(function(b){
+      var p = b.getAttribute("data-w").split(",").map(Number);
+      b.setAttribute("aria-pressed", String(p[0]===w[0] && p[1]===w[1] && p[2]===w[2]));
+    });
+  }
+  [fit,pow,fea].forEach(function(i){ i.addEventListener("input", render); });
+  presets.forEach(function(b){
+    b.addEventListener("click", function(){
+      var p = b.getAttribute("data-w").split(",");
+      fit.value = p[0]; pow.value = p[1]; fea.value = p[2]; render();
+    });
+  });
+  var sj = document.getElementById("src-judge"), sa = document.getElementById("src-analyst");
+  function setSrc(s){ src = s; sj.setAttribute("aria-pressed", String(s==="j")); sa.setAttribute("aria-pressed", String(s==="a")); render(); }
+  sj.addEventListener("click", function(){ setSrc("j"); });
+  sa.addEventListener("click", function(){ setSrc("a"); });
+  render();
+
+  var tabs = document.querySelectorAll('[role="tab"]');
+  function select(t){
+    tabs.forEach(function(x){
+      var on = x === t;
+      x.setAttribute("aria-selected", String(on));
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.tabIndex = i === 0 ? 0 : -1;
+    t.addEventListener("click", function(){ select(t); });
+    t.addEventListener("keydown", function(e){
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      var n = (i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length;
+      select(tabs[n]); tabs[n].focus();
+    });
+  });
+
+  var btn = document.getElementById("copy-btn"), pre = document.getElementById("install");
+  btn.addEventListener("click", function(){
+    var text = pre.textContent;
+    function fallback(){
+      var r = document.createRange(); r.selectNodeContents(pre);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      btn.textContent = "Selected, press Ctrl+C";
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function(){ btn.textContent = "Copied"; }, fallback);
+    } catch(e){ fallback(); }
+  });
+})();
+</script>
